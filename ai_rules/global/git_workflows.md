@@ -1,0 +1,154 @@
+# Git Workflow Rules
+
+## Branch Creation Workflow
+
+When creating a new git branch, always follow this sequence:
+
+1. **Checkout master**: `git checkout master`
+2. **Pull latest changes**: `git pull origin master`
+3. **Create new branch**: `git checkout -b <branch-name>`
+
+This ensures:
+
+- You're always branching from the latest codebase
+- Prevents merge conflicts later
+- Maintains a clean git history
+
+## Branch Naming Convention
+
+- Always include Jira ticket number in branch names
+- **Always use lowercase** for branch names
+- Format: `<jira-ticket>/descriptive-name` or `feature/hous-1234-brief-description` or `bugfix/HOUS-1234-brief-description`
+- Examples:
+  - `hous-1711/cursor-add-real-data`
+  - `feature/hous-1518-add-user-authentication`
+  - `bugfix/hous-1519-fix-form-validation`
+
+## Commit Best Practices
+
+- **Always commit only specific files** that were recently changed
+- **NEVER use `git commit .`** - this can commit unintended changes
+- **Always ask before committing files** - confirm with the user what should be committed
+- Use `git add <specific-file>` for each file you intend to commit
+- **NEVER use `git add .`**
+- Review changes with `git status` and `git diff` before committing
+
+### Example Safe Commit Process
+
+```bash
+git status                    # Review what's changed
+git add src/specific-file.ts  # Add only the files you changed
+git commit -m "feat: your changes"
+```
+
+## Build Validation Rules
+
+- **Always run `pnpm build`** if `package.json` has been modified
+- This ensures that dependency changes don't break the build
+- Run the build before committing changes to `package.json`
+- If build fails, fix the issues before proceeding with the commit
+
+## Commit Messages
+
+Write your git commits following the "conventional commits" semantics and guidelines.
+
+Prefixes for commits:
+
+- `build:`
+- `chore:`
+- `ci:`
+- `docs:`
+- `feat:`
+- `fix:`
+- `perf:`
+- `refactor:`
+- `revert:`
+- `style:`
+- `test:`
+
+Optional decorations for the prefixes:
+
+- `(<scope>)` e.g., `fix(test)` or `fix(api)`
+- `BREAKING CHANGE: <description>`: In a new line, after the main message
+
+When attempting to add multiple lines in the commit message, use always the single-line message format.
+Example:
+
+```
+git commit -m "feat: support zero amounts and file comments" -m "- Allow zero amounts in both expense and income entries" -m "- Change entry sorting to ascending order for better readability" -m "- Add support for comments in .dat files (lines starting with ;)" -m "- Update documentation to version 1.3 with new features"
+```
+
+Include Jira ticket number in commit messages when possible:
+
+- Format: `[HOUS-1234] Brief description of changes`
+- Example: `[HOUS-1518] Add user authentication middleware`
+
+## PR Creation Rules
+
+When creating pull requests, always follow these requirements:
+
+### PR Title Format
+
+- **MUST** include Jira ticket number in brackets at the beginning
+- **MUST** capitalize the Jira ticket number (e.g., `hous-1518` becomes `HOUS-1518`)
+- Format: `[HOUS-1234] Brief description of changes`
+- Examples:
+  - `[HOUS-1518] Add user authentication middleware`
+  - `[HOUS-1519] Fix form validation issues`
+
+### PR Description Requirements
+
+- **MUST** include a link to the Jira ticket in the description
+- Format: `Jira: https://spotify.atlassian.net/browse/HOUS-1234`
+- Should include brief summary of changes and testing notes
+
+### PR Creation Workflow
+
+**ALWAYS** follow this sequence when creating pull requests:
+
+1. **Push branch first**: `git push origin <branch-name>`
+2. **Then create PR**: Use `gh pr create` command
+
+This prevents interactive prompts and ensures a smooth PR creation process.
+
+### PR URL Return Requirement
+
+- **ALWAYS** return the URL of the created PR in the response
+- Include the PR URL prominently in the success message
+- Format: `🎉 PR Created: [URL]`
+- This helps users quickly access their pull request for review
+
+### PR Creation Commands
+
+- **Step 1**: Push the branch: `git push origin <branch-name>`
+- **Step 2**: Create PR: `gh pr create --title "[HOUS-1234] Your title" --body "Description with Jira: https://spotify.atlassian.net/browse/HOUS-1234"`
+- Alternative: Use `pnpm pr` if available (may require manual title/description editing)
+
+### Example PR Creation
+
+```bash
+# First, push the branch
+git push origin hous-1518/add-user-authentication
+
+# Then create the PR
+gh pr create \
+  --title "[HOUS-1518] Add user authentication middleware" \
+  --body "Implements JWT-based authentication for API endpoints.
+
+Jira: https://spotify.atlassian.net/browse/HOUS-1518
+
+## Changes
+- Add JWT middleware
+- Update route protection
+- Add auth tests"
+```
+
+## Code Style
+
+- Follow existing ESLint and Prettier configurations
+- Run `pnpm lint` before committing
+- Use `pnpm format` to auto-format code
+
+## Implementation
+
+The AI assistant should automatically execute this workflow whenever asked to create a new branch, without requiring explicit confirmation for each step.
