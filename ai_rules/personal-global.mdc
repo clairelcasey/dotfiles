@@ -1,6 +1,7 @@
 ---
-type: always
 description: Personal global dev guidelines
+globs:
+alwaysApply: true
 ---
 
 ## _global

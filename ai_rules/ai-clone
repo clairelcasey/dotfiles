@@ -1,0 +1,177 @@
+#!/bin/bash
+
+# ai-clone: Clone a GitHub repository and run sync-user-rules within it
+# Usage: ai-clone <github-ssh-path> [clone-directory]
+# Example: ai-clone git@ghe.spotify.net:anchor/lambda-spotify-episode-uri-writer.git ~/my-projects
+
+set -e  # Exit on any error
+
+# Default clone directory
+DEFAULT_CLONE_DIR="$HOME/Documents/houston/spotify-wide"
+
+# Function to display usage information
+show_usage() {
+    cat << EOF
+Usage: ai-clone <github-ssh-path> [clone-directory]
+
+Clone a GitHub repository and run sync-user-rules within it.
+
+Arguments:
+  github-ssh-path    Required. GitHub SSH path (e.g., git@ghe.spotify.net:user/repo.git)
+  clone-directory    Optional. Directory where repository will be cloned 
+                     (default: ~/Documents/wavelength/spotify-wide)
+
+Examples:
+  ai-clone git@ghe.spotify.net:anchor/lambda-spotify-episode-uri-writer.git
+  ai-clone git@ghe.spotify.net:anchor/lambda-spotify-episode-uri-writer.git ~/my-projects
+
+EOF
+}
+
+# Function to validate GitHub SSH path format
+validate_github_path() {
+    local path="$1"
+    if [[ ! "$path" =~ ^git@[^:]+:[^/]+/.+\.git$ ]]; then
+        echo "Error: Invalid GitHub SSH path format. Expected format: git@hostname:user/repo.git"
+        echo "Received: $path"
+        exit 1
+    fi
+}
+
+# Function to extract repository name from SSH path
+extract_repo_name() {
+    local ssh_path="$1"
+    # Extract the part after the last slash and remove .git extension
+    basename "$ssh_path" .git
+}
+
+# Parse command line arguments
+if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_usage
+    exit 0
+fi
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    echo "Error: Invalid number of arguments."
+    show_usage
+    exit 1
+fi
+
+GITHUB_SSH_PATH="$1"
+CLONE_DIR="${2:-$DEFAULT_CLONE_DIR}"
+
+# Validate inputs
+validate_github_path "$GITHUB_SSH_PATH"
+
+# Extract repository name for local directory
+REPO_NAME=$(extract_repo_name "$GITHUB_SSH_PATH")
+
+echo "GitHub SSH Path: $GITHUB_SSH_PATH"
+echo "Clone Directory: $CLONE_DIR"
+echo "Repository Name: $REPO_NAME"
+
+# Check if required tools are available
+if ! command -v git &> /dev/null; then
+    echo "Error: git is not installed or not in PATH"
+    exit 1
+fi
+
+# Expand tilde in clone directory path
+CLONE_DIR="${CLONE_DIR/#\~/$HOME}"
+
+# Create clone directory if it doesn't exist
+if [ ! -d "$CLONE_DIR" ]; then
+    echo "Creating clone directory: $CLONE_DIR"
+    mkdir -p "$CLONE_DIR" || {
+        echo "Error: Failed to create directory $CLONE_DIR"
+        exit 1
+    }
+fi
+
+# Navigate to clone directory
+cd "$CLONE_DIR" || {
+    echo "Error: Failed to navigate to directory $CLONE_DIR"
+    exit 1
+}
+
+TARGET_DIR="$CLONE_DIR/$REPO_NAME"
+
+# Check if repository already exists
+if [ -d "$REPO_NAME" ]; then
+    echo "Warning: Directory $REPO_NAME already exists in $CLONE_DIR"
+    echo "Using existing directory. If you want a fresh clone, please remove it first."
+    cd "$REPO_NAME" || {
+        echo "Error: Failed to navigate to existing repository directory"
+        exit 1
+    }
+else
+    # Clone the repository
+    echo "Cloning repository: $GITHUB_SSH_PATH"
+    echo "Into directory: $TARGET_DIR"
+    
+    if git clone "$GITHUB_SSH_PATH" "$REPO_NAME"; then
+        echo "Successfully cloned repository"
+        cd "$REPO_NAME" || {
+            echo "Error: Failed to navigate to cloned repository"
+            exit 1
+        }
+    else
+        echo "Error: Failed to clone repository. Please check:"
+        echo "  1. SSH key is configured for the git host"
+        echo "  2. Repository path is correct"
+        echo "  3. You have access to the repository"
+        exit 1
+    fi
+fi
+
+# Check if sync-user-rules script exists and is executable
+SYNC_SCRIPT_PATH=""
+
+# Get the directory where ai-clone script is actually located (resolve symlinks)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+    SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+if command -v sync-user-rules.sh &> /dev/null; then
+    SYNC_SCRIPT_PATH="sync-user-rules.sh"
+elif [ -f "./sync-user-rules.sh" ]; then
+    SYNC_SCRIPT_PATH="./sync-user-rules.sh"
+elif [ -f "../sync-user-rules.sh" ]; then
+    SYNC_SCRIPT_PATH="../sync-user-rules.sh"
+elif [ -f "$SCRIPT_DIR/sync-user-rules.sh" ]; then
+    SYNC_SCRIPT_PATH="$SCRIPT_DIR/sync-user-rules.sh"
+else
+    echo "Error: sync-user-rules.sh not found. Searched in:"
+    echo "  - PATH (as sync-user-rules.sh)"
+    echo "  - Current directory: $(pwd)/sync-user-rules.sh"
+    echo "  - Parent directory: $(dirname $(pwd))/sync-user-rules.sh"
+    echo "  - Script directory: $SCRIPT_DIR/sync-user-rules.sh"
+    exit 1
+fi
+
+# Execute sync-user-rules
+echo "Executing sync-user-rules in repository: $REPO_NAME"
+echo "Current directory: $(pwd)"
+
+if [ -x "$SYNC_SCRIPT_PATH" ]; then
+    if "$SYNC_SCRIPT_PATH"; then
+        echo "✅ Successfully executed sync-user-rules"
+        echo "Repository setup complete: $TARGET_DIR"
+        echo ""
+        echo "To start working in the repository, run:"
+        echo "cd $TARGET_DIR"
+        echo ""
+        # Change to the repository directory for any final operations
+        cd "$TARGET_DIR"
+    else
+        echo "❌ sync-user-rules execution failed"
+        exit 1
+    fi
+else
+    echo "Error: sync-user-rules.sh is not executable. Run: chmod +x $SYNC_SCRIPT_PATH"
+    exit 1
+fi 

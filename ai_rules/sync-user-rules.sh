@@ -35,8 +35,9 @@ fi
 # 1. Build/overwrite the combined MDC file
 {
   echo "---"
-  echo "type: always"
   echo "description: Personal global dev guidelines"
+  echo "globs:"
+  echo "alwaysApply: true"
   echo "---"
   echo
   for src in $(ls -1 "$GLOBAL_DIR"/*.md 2>/dev/null | sort); do
@@ -61,8 +62,9 @@ for src in $(ls -1 "$GLOBAL_DIR"/*.md 2>/dev/null | sort); do
   dest_mdc="$dest_dir/${rule_basename}.mdc"
   {
     echo "---"
-    echo "type: always"
     echo "description: ${rule_basename//_/ }"
+    echo "globs:"
+    echo "alwaysApply: true"
     echo "---"
     echo
     cat "$src"
