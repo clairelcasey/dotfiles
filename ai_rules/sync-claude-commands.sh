@@ -5,93 +5,65 @@
 # Usage:
 #   ~/dotfiles/ai_rules/sync-claude-commands.sh
 #
-# - Parses allowed and forbidden commands from _global.md
-# - Updates ~/.claude/settings.local.json with command policies
+# - Combines all markdown files from global/ directory
+# - Creates a unified ~/.claude/CLAUDE.md file with all rules
 # --------------------------------------------------------------
 
 set -euo pipefail
 
 AI_RULE_DIR="$HOME/dotfiles/ai_rules"
-GLOBAL_FILE="$AI_RULE_DIR/global/_global.md"
+GLOBAL_DIR="$AI_RULE_DIR/global"
 CLAUDE_DIR="$HOME/.claude"
-SETTINGS_FILE="$CLAUDE_DIR/settings.local.json"
+CLAUDE_FILE="$CLAUDE_DIR/CLAUDE.md"
 
-if [ ! -f "$GLOBAL_FILE" ]; then
-  echo "Error: expected rule file $GLOBAL_FILE not found" >&2
+if [ ! -d "$GLOBAL_DIR" ]; then
+  echo "Error: expected global directory $GLOBAL_DIR not found" >&2
   exit 1
 fi
 
 mkdir -p "$CLAUDE_DIR"
 
-# Parse allowed commands from _global.md
-parse_allowed_commands() {
-  # Extract lines between "## Always Allowed Commands" and next "##" marker
-  sed -n '/^## Always Allowed Commands$/,/^##/p' "$GLOBAL_FILE" | \
-  grep '^- `' | \
-  sed 's/^- `\([^`]*\)`.*/\1/' | \
-  sort
+# Build combined CLAUDE.md file
+build_claude_md() {
+  echo "# AI Assistant Rules"
+  echo ""
+  echo "This file contains all AI assistant rules and preferences combined from the global configuration."
+  echo ""
+  echo "Last updated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+  echo ""
+  echo "---"
+  echo ""
+  
+  # Process each markdown file in the global directory
+  find "$GLOBAL_DIR" -name "*.md" -type f | sort | while read -r md_file; do
+    filename=$(basename "$md_file")
+    echo "<!-- START: $filename -->"
+    echo ""
+    
+    # Add the content of the file
+    cat "$md_file"
+    
+    echo ""
+    echo "<!-- END: $filename -->"
+    echo ""
+    echo "---"
+    echo ""
+  done
 }
 
-# Parse forbidden commands from _global.md  
-parse_forbidden_commands() {
-  # Extract lines between "## Forbidden Commands" and end of file (since it's the last section)
-  # Only get the first command before any parenthetical explanations
-  sed -n '/^## Forbidden Commands$/,$p' "$GLOBAL_FILE" | \
-  grep '^- `' | \
-  sed 's/^- `\([^`(]*\).*/\1/' | \
-  sed 's/[[:space:]]*$//' | \
-  sort
-}
+# Create the unified CLAUDE.md file
+build_claude_md > "$CLAUDE_FILE"
 
-# Build JSON structure
-build_settings_json() {
-  # Start JSON structure
-  echo "{"
-  echo "  \"command_execution\": {"
-  echo "    \"policy\": {"
-  
-  # Add allowed commands
-  echo "      \"allowed_commands\": ["
-  local first=true
-  while read -r cmd; do
-    if [ "$first" = true ]; then
-      first=false
-      echo "        \"$cmd\""
-    else
-      echo "        ,\"$cmd\""
-    fi
-  done < <(parse_allowed_commands)
-  echo "      ],"
-  
-  # Add forbidden commands  
-  echo "      \"forbidden_commands\": ["
-  first=true
-  while read -r cmd; do
-    if [ "$first" = true ]; then
-      first=false
-      echo "        \"$cmd\""
-    else
-      echo "        ,\"$cmd\""
-    fi
-  done < <(parse_forbidden_commands)
-  echo "      ]"
-  
-  echo "    },"
-  echo "    \"description\": \"Command execution policy synced from ai_rules/_global.md\","
-  echo "    \"last_updated\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\""
-  echo "  }"
-  echo "}"
-}
-
-# Create or update settings file
-build_settings_json > "$SETTINGS_FILE"
-
-echo "✔︎ Updated Claude command policies at $SETTINGS_FILE"
+echo "✔︎ Created unified Claude rules file at $CLAUDE_FILE"
 
 # Show summary
 echo ""
-echo "📋 Command Policy Summary:"
-echo "  Allowed: $(parse_allowed_commands | wc -l | tr -d ' ') commands"
-echo "  Forbidden: $(parse_forbidden_commands | wc -l | tr -d ' ') commands"
+echo "📋 Files Combined:"
+find "$GLOBAL_DIR" -name "*.md" -type f | while read -r md_file; do
+  filename=$(basename "$md_file")
+  lines=$(wc -l < "$md_file")
+  echo "  - $filename ($lines lines)"
+done
+
 echo ""
-echo "✅ Claude settings updated." 
+echo "✅ Claude rules unified and updated." 
