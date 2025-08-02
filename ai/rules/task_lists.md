@@ -4,10 +4,12 @@ Guidelines for creating and managing task lists in markdown files to track proje
 
 ## Task List Creation
 
-1. Create task lists in a markdown file (in the project root):
+1. Create task lists in a markdown file in the `/task-lists` folder (in the project root):
 
+   - Create the `/task-lists` folder if it doesn't exist
    - Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
    - Include a clear title and description of the feature being implemented
+   - All task files should be saved in `/task-lists/` to keep them organized and excluded from git
 
 2. Structure the file with these sections:
 

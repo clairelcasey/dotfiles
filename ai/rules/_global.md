@@ -1,7 +1,7 @@
 # User Rules Update Policy
 
 - When the user requests changes to rules, the assistant **must first clarify** whether they are **user-level rules** (global) or **project-specific rules**.
-- If they are **user rules**, the assistant must apply the changes to the files inside `~/dotfiles/ai_rules` (the global rules repository).
+- If they are **user rules**, the assistant must apply the changes to the files inside `~/dotfiles/ai` (the global rules repository).
 - If they are **project rules**, the assistant may create or edit the rule files within the current project repository.
 
 # Command Execution Policy

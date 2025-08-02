@@ -160,6 +160,43 @@ echo "Current directory: $(pwd)"
 if [ -x "$SYNC_SCRIPT_PATH" ]; then
     if "$SYNC_SCRIPT_PATH"; then
         echo "✅ Successfully executed sync-user-rules"
+    else
+        echo "❌ sync-user-rules execution failed"
+        exit 1
+    fi
+else
+    echo "Error: sync-user-rules.sh is not executable. Run: chmod +x $SYNC_SCRIPT_PATH"
+    exit 1
+fi
+
+# Execute sync-or-create-project-rules
+PROJECT_RULES_SCRIPT_PATH=""
+
+if command -v sync-or-create-project-rules.sh &> /dev/null; then
+    PROJECT_RULES_SCRIPT_PATH="sync-or-create-project-rules.sh"
+elif [ -f "./sync-or-create-project-rules.sh" ]; then
+    PROJECT_RULES_SCRIPT_PATH="./sync-or-create-project-rules.sh"
+elif [ -f "../sync-or-create-project-rules.sh" ]; then
+    PROJECT_RULES_SCRIPT_PATH="../sync-or-create-project-rules.sh"
+elif [ -f "$SCRIPT_DIR/sync-or-create-project-rules.sh" ]; then
+    PROJECT_RULES_SCRIPT_PATH="$SCRIPT_DIR/sync-or-create-project-rules.sh"
+else
+    echo "⚠️  sync-or-create-project-rules.sh not found - skipping project rules setup"
+    echo "Repository setup complete: $TARGET_DIR"
+    echo ""
+    echo "To start working in the repository, run:"
+    echo "cd $TARGET_DIR"
+    echo ""
+    # Change to the repository directory for any final operations
+    cd "$TARGET_DIR"
+    exit 0
+fi
+
+echo ""
+echo "🔧 Setting up project rules..."
+if [ -x "$PROJECT_RULES_SCRIPT_PATH" ]; then
+    if "$PROJECT_RULES_SCRIPT_PATH"; then
+        echo "✅ Successfully executed sync-or-create-project-rules"
         echo "Repository setup complete: $TARGET_DIR"
         echo ""
         echo "To start working in the repository, run:"
@@ -168,10 +205,10 @@ if [ -x "$SYNC_SCRIPT_PATH" ]; then
         # Change to the repository directory for any final operations
         cd "$TARGET_DIR"
     else
-        echo "❌ sync-user-rules execution failed"
+        echo "❌ sync-or-create-project-rules execution failed"
         exit 1
     fi
 else
-    echo "Error: sync-user-rules.sh is not executable. Run: chmod +x $SYNC_SCRIPT_PATH"
+    echo "Error: sync-or-create-project-rules.sh is not executable. Run: chmod +x $PROJECT_RULES_SCRIPT_PATH"
     exit 1
 fi 

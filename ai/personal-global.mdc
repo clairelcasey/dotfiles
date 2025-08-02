@@ -4,12 +4,12 @@ globs:
 alwaysApply: true
 ---
 
-## _global
+## \_global
 
 # User Rules Update Policy
 
 - When the user requests changes to rules, the assistant **must first clarify** whether they are **user-level rules** (global) or **project-specific rules**.
-- If they are **user rules**, the assistant must apply the changes to the files inside `~/dotfiles/ai_rules` (the global rules repository).
+- If they are **user rules**, the assistant must apply the changes to the files inside `~/dotfiles/ai` (the global rules repository).
 - If they are **project rules**, the assistant may create or edit the rule files within the current project repository.
 
 # Command Execution Policy
@@ -38,8 +38,6 @@ alwaysApply: true
 - `rm` (and any variant such as `rm -rf`, `rimraf`, etc.)
 
 > The assistant should refuse or request explicit confirmation from the user before attempting to run any command not listed as "Always Allowed" and must **never** run forbidden commands.
-
-
 
 ## git_workflows
 
@@ -198,8 +196,6 @@ Jira: https://spotify.atlassian.net/browse/HOUS-1518
 
 The AI assistant should automatically execute this workflow whenever asked to create a new branch, without requiring explicit confirmation for each step.
 
-
-
 ## task_lists
 
 # Task List Management
@@ -208,10 +204,12 @@ Guidelines for creating and managing task lists in markdown files to track proje
 
 ## Task List Creation
 
-1. Create task lists in a markdown file (in the project root):
+1. Create task lists in a markdown file in the `/task-lists` folder (in the project root):
 
+   - Create the `/task-lists` folder if it doesn't exist
    - Use `TASKS.md` or a descriptive name relevant to the feature (e.g., `ASSISTANT_CHAT.md`)
    - Include a clear title and description of the feature being implemented
+   - All task files should be saved in `/task-lists/` to keep them organized and excluded from git
 
 2. Structure the file with these sections:
 
@@ -311,6 +309,3 @@ Should become:
 - Always recommend the minimal changes needed to meet request expectations
 - Always re-run existing tests after any source code change
 - If you modify any source file (e.g. `.py` files, `.js` files, `.ts` files), check if the repository contains any test, and run them. Tests might be inside folders called `test`, or files containing `test` in their name
-
-
-
