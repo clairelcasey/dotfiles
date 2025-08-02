@@ -32,9 +32,21 @@ if [ -f "$CLAUDE_FILE" ]; then
 fi
 
 if [ -d "$CURSOR_RULES_DIR" ]; then
-  # Check if directory has any .md files
-  if ls "$CURSOR_RULES_DIR"/*.md >/dev/null 2>&1; then
+  # Check if directory has any .md or .mdc files (excluding user-rules subdirectory)
+  if ls "$CURSOR_RULES_DIR"/*.md >/dev/null 2>&1 || ls "$CURSOR_RULES_DIR"/*.mdc >/dev/null 2>&1; then
     cursor_rules_exists=true
+  fi
+  
+  # Special case: if only user-rules subdirectory exists (created by sync-user-rules.sh),
+  # don't consider this as having project-specific cursor rules
+  if [ -d "$CURSOR_RULES_DIR/user-rules" ]; then
+    # Count non-user-rules files
+    project_files_count=$(find "$CURSOR_RULES_DIR" -maxdepth 1 \( -name "*.md" -o -name "*.mdc" \) | wc -l)
+    
+    if [ "$project_files_count" -eq 0 ]; then
+      echo "ℹ️  Found only user-rules directory - treating as no project-specific rules"
+      cursor_rules_exists=false
+    fi
   fi
 fi
 
@@ -58,13 +70,13 @@ create_cursor_rules_from_claude() {
 create_claude_from_cursor_rules() {
   local rule_files=()
   
-  # Find all .md files in .cursor/rules
+  # Find all .md and .mdc files in .cursor/rules (excluding user-rules subdirectory)
   while IFS= read -r -d '' file; do
     rule_files+=("$(basename "$file")")
-  done < <(find "$CURSOR_RULES_DIR" -maxdepth 1 -name "*.md" -print0 2>/dev/null || true)
+  done < <(find "$CURSOR_RULES_DIR" -maxdepth 1 \( -name "*.md" -o -name "*.mdc" \) -print0 2>/dev/null || true)
   
   if [ ${#rule_files[@]} -eq 0 ]; then
-    echo "⚠️  No .md files found in .cursor/rules directory"
+    echo "⚠️  No .md or .mdc files found in .cursor/rules directory"
     return
   fi
   

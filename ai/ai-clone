@@ -153,6 +153,30 @@ else
     exit 1
 fi
 
+# Execute sync-claude-prompts first to ensure latest prompts
+SYNC_PROMPTS_SCRIPT_PATH=""
+
+if command -v sync-claude-prompts.sh &> /dev/null; then
+    SYNC_PROMPTS_SCRIPT_PATH="sync-claude-prompts.sh"
+elif [ -f "$SCRIPT_DIR/sync-claude-prompts.sh" ]; then
+    SYNC_PROMPTS_SCRIPT_PATH="$SCRIPT_DIR/sync-claude-prompts.sh"
+else
+    echo "⚠️  sync-claude-prompts.sh not found - skipping prompts sync"
+fi
+
+if [ -n "$SYNC_PROMPTS_SCRIPT_PATH" ]; then
+    echo "🔄 Syncing Claude prompts..."
+    if [ -x "$SYNC_PROMPTS_SCRIPT_PATH" ]; then
+        if "$SYNC_PROMPTS_SCRIPT_PATH"; then
+            echo "✅ Successfully synced Claude prompts"
+        else
+            echo "⚠️  Claude prompts sync failed - continuing anyway"
+        fi
+    else
+        echo "⚠️  sync-claude-prompts.sh is not executable - skipping prompts sync"
+    fi
+fi
+
 # Execute sync-user-rules
 echo "Executing sync-user-rules in repository: $REPO_NAME"
 echo "Current directory: $(pwd)"

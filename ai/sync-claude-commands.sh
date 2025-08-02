@@ -66,4 +66,10 @@ find "$RULES_DIR" -name "*.md" -type f | while read -r md_file; do
 done
 
 echo ""
-echo "✅ Claude rules unified and updated." 
+echo "✅ Claude rules unified and updated."
+
+# Sync Claude prompts
+echo ""
+echo "🔧 Syncing Claude prompts..."
+CLAUDE_PROMPTS_SCRIPT="$(dirname "$0")/sync-claude-prompts.sh"
+"$CLAUDE_PROMPTS_SCRIPT" 
