@@ -91,7 +91,7 @@ This automatically:
 │   ├── sync-claude-agents.sh*      # Agent sync
 │   └── sync-or-create-project-rules.sh*  # Project rule setup
 ├── .claude/                         # Claude Code configuration
-│   └── settings.local.json         # Claude permissions
+│   └── settings.json               # Claude permissions
 └── .cursor/                         # Cursor IDE configuration
     └── rules/
         └── user-rules/              # Symlinked user rules

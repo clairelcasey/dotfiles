@@ -182,7 +182,7 @@ Rules are enforced through:
 
 1. **Configuration File**: `~/.claude/CLAUDE.md` contains all rules
 2. **Front-matter Metadata**: Rules have `alwaysApply: true` directive
-3. **Permission System**: `.claude/settings.local.json` defines allowed operations
+3. **Permission System**: `.claude/settings.json` defines allowed operations
 
 ### Cursor IDE Integration
 

@@ -11,6 +11,8 @@
 - `pnpm install`
 - `pnpm list`
 - `npm list`
+- `yarn install`
+- `yarn test`
 - `ls`
 - `pwd`
 - `cat`
@@ -24,6 +26,7 @@
 - `pnpm test`
 - `pnpm test:ci`
 - `pnpm build`
+- `WebFetch`
 
 ## Forbidden Commands
 

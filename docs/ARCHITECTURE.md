@@ -149,7 +149,7 @@ The system integrates with Claude Code through:
 1. **Configuration File**: `~/.claude/CLAUDE.md` contains all rules
 2. **Agent Files**: `~/.claude/agents/` contains agent definitions
 3. **Prompt Files**: `~/.claude/*.prompt` contains reusable prompts
-4. **Permissions**: `.claude/settings.local.json` defines allowed operations
+4. **Permissions**: `.claude/settings.json` defines allowed operations
 
 ### Cursor IDE Integration
 
@@ -184,7 +184,7 @@ Rules define allowed/forbidden commands:
 
 ### Permission System
 
-Claude Code permissions in `.claude/settings.local.json`:
+Claude Code permissions in `.claude/settings.json`:
 
 ```json
 {
