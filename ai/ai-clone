@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ai-clone: Clone a GitHub repository and run sync-user-rules within it
+# ai-clone: Clone a GitHub repository and run sync-agents within it
 # Usage: ai-clone <github-ssh-path> [clone-directory]
 # Example: ai-clone git@ghe.spotify.net:anchor/lambda-spotify-episode-uri-writer.git ~/my-projects
 
@@ -14,7 +14,7 @@ show_usage() {
     cat << EOF
 Usage: ai-clone <github-ssh-path> [clone-directory]
 
-Clone a GitHub repository and run sync-user-rules within it.
+Clone a GitHub repository and run sync-agents within it.
 
 Arguments:
   github-ssh-path    Required. GitHub SSH path (e.g., git@ghe.spotify.net:user/repo.git)
@@ -124,72 +124,20 @@ else
     fi
 fi
 
-# Check if sync-user-rules script exists and is executable
-SYNC_SCRIPT_PATH=""
-
-# Get the directory where ai-clone script is actually located (resolve symlinks)
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-    SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
-    SOURCE="$(readlink "$SOURCE")"
-    [[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
-
-if command -v sync-user-rules.sh &> /dev/null; then
-    SYNC_SCRIPT_PATH="sync-user-rules.sh"
-elif [ -f "./sync-user-rules.sh" ]; then
-    SYNC_SCRIPT_PATH="./sync-user-rules.sh"
-elif [ -f "../sync-user-rules.sh" ]; then
-    SYNC_SCRIPT_PATH="../sync-user-rules.sh"
-elif [ -f "$SCRIPT_DIR/sync-user-rules.sh" ]; then
-    SYNC_SCRIPT_PATH="$SCRIPT_DIR/sync-user-rules.sh"
-else
-    echo "Error: sync-user-rules.sh not found. Searched in:"
-    echo "  - PATH (as sync-user-rules.sh)"
-    echo "  - Current directory: $(pwd)/sync-user-rules.sh"
-    echo "  - Parent directory: $(dirname $(pwd))/sync-user-rules.sh"
-    echo "  - Script directory: $SCRIPT_DIR/sync-user-rules.sh"
-    exit 1
-fi
-
-# Execute sync-claude-prompts first to ensure latest prompts
-SYNC_PROMPTS_SCRIPT_PATH=""
-
-if command -v sync-claude-prompts.sh &> /dev/null; then
-    SYNC_PROMPTS_SCRIPT_PATH="sync-claude-prompts.sh"
-elif [ -f "$SCRIPT_DIR/sync-claude-prompts.sh" ]; then
-    SYNC_PROMPTS_SCRIPT_PATH="$SCRIPT_DIR/sync-claude-prompts.sh"
-else
-    echo "⚠️  sync-claude-prompts.sh not found - skipping prompts sync"
-fi
-
-if [ -n "$SYNC_PROMPTS_SCRIPT_PATH" ]; then
-    echo "🔄 Syncing Claude prompts..."
-    if [ -x "$SYNC_PROMPTS_SCRIPT_PATH" ]; then
-        if "$SYNC_PROMPTS_SCRIPT_PATH"; then
-            echo "✅ Successfully synced Claude prompts"
-        else
-            echo "⚠️  Claude prompts sync failed - continuing anyway"
-        fi
-    else
-        echo "⚠️  sync-claude-prompts.sh is not executable - skipping prompts sync"
-    fi
-fi
-
-# Execute sync-user-rules
-echo "Executing sync-user-rules in repository: $REPO_NAME"
+# Execute sync-agents to set up all Claude components
+echo "🚀 Setting up Claude components in repository: $REPO_NAME"
 echo "Current directory: $(pwd)"
 
-if [ -x "$SYNC_SCRIPT_PATH" ]; then
-    if "$SYNC_SCRIPT_PATH"; then
-        echo "✅ Successfully executed sync-user-rules"
+if command -v sync-agents &> /dev/null; then
+    if sync-agents; then
+        echo "✅ Successfully executed sync-agents"
     else
-        echo "❌ sync-user-rules execution failed"
+        echo "❌ sync-agents execution failed"
         exit 1
     fi
 else
-    echo "Error: sync-user-rules.sh is not executable. Run: chmod +x $SYNC_SCRIPT_PATH"
+    echo "Error: sync-agents command not found in PATH"
+    echo "Please ensure sync-agents is properly installed and accessible"
     exit 1
 fi
 
@@ -202,8 +150,8 @@ elif [ -f "./sync-or-create-project-rules.sh" ]; then
     PROJECT_RULES_SCRIPT_PATH="./sync-or-create-project-rules.sh"
 elif [ -f "../sync-or-create-project-rules.sh" ]; then
     PROJECT_RULES_SCRIPT_PATH="../sync-or-create-project-rules.sh"
-elif [ -f "$SCRIPT_DIR/sync-or-create-project-rules.sh" ]; then
-    PROJECT_RULES_SCRIPT_PATH="$SCRIPT_DIR/sync-or-create-project-rules.sh"
+elif command -v ~/dotfiles/ai/sync-or-create-project-rules.sh &> /dev/null; then
+    PROJECT_RULES_SCRIPT_PATH="~/dotfiles/ai/sync-or-create-project-rules.sh"
 else
     echo "⚠️  sync-or-create-project-rules.sh not found - skipping project rules setup"
     echo "Repository setup complete: $TARGET_DIR"
@@ -212,7 +160,7 @@ else
     echo "cd $TARGET_DIR"
     echo ""
     # Change to the repository directory for any final operations
-    cd "$TARGET_DIR"
+    cd "$TARGET_DIR" 2>/dev/null || true
     exit 0
 fi
 
@@ -227,7 +175,7 @@ if [ -x "$PROJECT_RULES_SCRIPT_PATH" ]; then
         echo "cd $TARGET_DIR"
         echo ""
         # Change to the repository directory for any final operations
-        cd "$TARGET_DIR"
+        cd "$TARGET_DIR" 2>/dev/null || true
     else
         echo "❌ sync-or-create-project-rules execution failed"
         exit 1

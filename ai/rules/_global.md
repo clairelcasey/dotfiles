@@ -13,6 +13,9 @@
 - `npm list`
 - `yarn install`
 - `yarn test`
+- `yarn build`
+- `yarn lint`
+- `yarn eslint`
 - `ls`
 - `pwd`
 - `cat`
@@ -20,6 +23,9 @@
 - `git status`
 - `git log`
 - `git diff`
+- `git fetch`
+- `git branch`
+- `git show`
 - `git checkout`
 - `git pull origin master`
 - `pnpm audit`
@@ -27,6 +33,26 @@
 - `pnpm test:ci`
 - `pnpm build`
 - `WebFetch`
+- `head`
+- `tail`
+- `less`
+- `more`
+- `file`
+- `wc`
+- `sort`
+- `uniq`
+- `awk`
+- `sed`
+- `cut`
+- `tr`
+- `ps`
+- `top`
+- `env`
+- `printenv`
+- `whoami`
+- `id`
+- `echo`
+- `mkdir -p tmp`
 
 ## Forbidden Commands
 

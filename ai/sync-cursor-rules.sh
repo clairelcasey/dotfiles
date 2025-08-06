@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # --------------------------------------------------------------
-# sync-user-rules.sh
+# sync-cursor-rules.sh
 #
 # Usage (inside a Git repo):
-#   ~/dotfiles/ai/sync-user-rules.sh
+#   ~/dotfiles/ai/sync-cursor-rules.sh
 #
 # - Creates or updates ~/dotfiles/ai/personal-global.mdc
 #   by concatenating **all** markdown rule files found in
@@ -73,30 +73,6 @@ done
 
 echo "✔︎ Generated individual .mdc rule files into $dest_dir"
 
-# 2b. Create/update symlinks in ~/.claude and index file
-CLAUDE_DIR="$HOME/.claude"
-CLAUDE_FILE="$CLAUDE_DIR/CLAUDE.md"
-mkdir -p "$CLAUDE_DIR"
-
-# Iterate over global rule files and create/update symlinks in ~/.claude
-for src in $(ls -1 "$RULES_DIR"/*.md 2>/dev/null | sort); do
-  ln -sf "$src" "$CLAUDE_DIR/$(basename "$src")"
-  created_symlinks+=("$(basename "$src")")
-done
-
-# Rebuild CLAUDE.md with list of links to symlinked files
-{
-  echo "# Claude Global Rule Symlinks"
-  echo ""
-  echo "These are symlinks to the current set of personal global rule files."
-  echo ""
-  for file in "${created_symlinks[@]}"; do
-    echo "- [${file}](${file})"
-  done
-} > "$CLAUDE_FILE"
-
-echo "✔︎ Updated symlinks and index at $CLAUDE_FILE"
-
 # 3. Ensure folders are ignored by Git
 exclude_file="$git_root/.git/info/exclude"
 
@@ -114,10 +90,4 @@ if ! grep -qxF "$task_lists_pattern" "$exclude_file" 2>/dev/null; then
   echo "✔︎ Added $task_lists_pattern to .git/info/exclude"
 fi
 
-echo "✅ User rules synced and linked."
-
-# 4. Sync Claude command policies
-echo ""
-echo "🔧 Syncing Claude command policies..."
-CLAUDE_SYNC_SCRIPT="$(dirname "$0")/sync-claude-commands.sh"
-"$CLAUDE_SYNC_SCRIPT"
+echo "✅ Cursor rules synced and linked."

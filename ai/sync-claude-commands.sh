@@ -41,8 +41,13 @@ build_claude_md() {
     echo "<!-- START: $filename -->"
     echo ""
     
-    # Add the content of the file
-    cat "$md_file"
+    # Add the content of the file, excluding command permission sections
+    if [ "$filename" = "_global.md" ]; then
+      # For _global.md, exclude the command permission sections since they're in settings.json
+      sed '/^## Always Allowed Commands$/,/^> The assistant should refuse/d' "$md_file"
+    else
+      cat "$md_file"
+    fi
     
     echo ""
     echo "<!-- END: $filename -->"
