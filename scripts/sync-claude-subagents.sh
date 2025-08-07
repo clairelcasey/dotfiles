@@ -11,17 +11,17 @@ SUBAGENTS_DIR="$DOTFILES_DIR/ai/subagents"
 
 echo "🔄 Syncing subagents to ~/.claude..."
 
-# Create ~/.claude/subagents directory if it doesn't exist
-mkdir -p "$CLAUDE_DIR/subagents"
+# Create ~/.claude/agents directory if it doesn't exist
+mkdir -p "$CLAUDE_DIR/agents"
 
 # Copy all subagent files
 if [ -d "$SUBAGENTS_DIR" ]; then
-    cp -r "$SUBAGENTS_DIR"/* "$CLAUDE_DIR/subagents/"
-    echo "✅ Copied subagents from $SUBAGENTS_DIR to $CLAUDE_DIR/subagents/"
+    cp -r "$SUBAGENTS_DIR"/* "$CLAUDE_DIR/agents/"
+    echo "✅ Copied subagents from $SUBAGENTS_DIR to $CLAUDE_DIR/agents/"
     
     # List what was synced
     echo "📋 Synced subagents:"
-    ls -la "$CLAUDE_DIR/subagents/"
+    ls -la "$CLAUDE_DIR/agents/"
 else
     echo "❌ Subagents directory not found at $SUBAGENTS_DIR"
     exit 1
