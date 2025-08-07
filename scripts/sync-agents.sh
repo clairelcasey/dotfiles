@@ -5,10 +5,11 @@
 # Usage:
 #   ~/dotfiles/scripts/sync-agents.sh
 #
-# Orchestrates syncing of all Claude-related components:
+# Orchestrates syncing of all AI development components:
 # - Claude prompts
 # - Claude agents  
 # - Claude commands/rules
+# - Cursor rules (when in git repository)
 # --------------------------------------------------------------
 
 set -euo pipefail

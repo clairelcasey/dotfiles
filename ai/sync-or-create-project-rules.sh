@@ -1,0 +1,1 @@
+/Users/ccasey/dotfiles/scripts/sync-or-create-project-rules.sh

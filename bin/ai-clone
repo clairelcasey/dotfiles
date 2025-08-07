@@ -150,8 +150,8 @@ elif [ -f "./sync-or-create-project-rules.sh" ]; then
     PROJECT_RULES_SCRIPT_PATH="./sync-or-create-project-rules.sh"
 elif [ -f "../sync-or-create-project-rules.sh" ]; then
     PROJECT_RULES_SCRIPT_PATH="../sync-or-create-project-rules.sh"
-elif command -v ~/dotfiles/ai/sync-or-create-project-rules.sh &> /dev/null; then
-    PROJECT_RULES_SCRIPT_PATH="~/dotfiles/ai/sync-or-create-project-rules.sh"
+elif [ -f "$HOME/dotfiles/ai/sync-or-create-project-rules.sh" ]; then
+    PROJECT_RULES_SCRIPT_PATH="$HOME/dotfiles/ai/sync-or-create-project-rules.sh"
 else
     echo "⚠️  sync-or-create-project-rules.sh not found - skipping project rules setup"
     echo "Repository setup complete: $TARGET_DIR"
