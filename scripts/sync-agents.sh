@@ -18,6 +18,7 @@ SCRIPT_PATH="$0"
 while [ -L "$SCRIPT_PATH" ]; do
     SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
 done
+# Get the actual directory of this script, following symlinks
 AI_DIR="$(dirname "$SCRIPT_PATH")"
 
 echo "🚀 Starting Claude agents sync..."
@@ -35,7 +36,7 @@ fi
 # 2. Sync Claude agents
 echo ""
 echo "🤖 Syncing Claude agents..."
-CLAUDE_AGENTS_SCRIPT="$AI_DIR/sync-claude-agents.sh"
+CLAUDE_AGENTS_SCRIPT="$AI_DIR/sync-claude-subagents.sh"
 if [ -f "$CLAUDE_AGENTS_SCRIPT" ]; then
     "$CLAUDE_AGENTS_SCRIPT"
 else
