@@ -20,17 +20,17 @@ This dotfiles repository provides:
    ```bash
    git clone <this-repo> ~/dotfiles
    cd ~/dotfiles
-   chmod +x ai/*.sh ai/ai-clone
+   chmod +x scripts/*.sh bin/ai-clone
    ```
 
 2. **Add to PATH** (add to your shell profile):
    ```bash
-   export PATH="$HOME/dotfiles/ai:$PATH"
+   export PATH="$HOME/dotfiles/scripts:$HOME/dotfiles/bin:$PATH"
    ```
 
 3. **Sync Claude Rules**:
    ```bash
-   ~/dotfiles/ai/sync-claude-commands.sh
+   ~/dotfiles/scripts/sync-claude-commands.sh
    ```
 
 ### Using the ai-clone Command
@@ -60,11 +60,10 @@ This automatically:
 
 ### Agents
 - **docs-audit** ([`ai/agents/docs-audit.md`](ai/agents/docs-audit.md)): Documentation audit specialist
-- **route-walkthrough** ([`ai/agents/route-walkthrough.md`](ai/agents/route-walkthrough.md)): API flow explainer
 - **general-explainer** ([`ai/agents/general-explainer.md`](ai/agents/general-explainer.md)): General purpose code explainer
 
 ### Sync Scripts
-- **sync-user-rules.sh** ([`ai/sync-user-rules.sh`](ai/sync-user-rules.sh)): Syncs global rules to projects
+- **sync-agents.sh** ([`ai/sync-agents.sh`](ai/sync-agents.sh)): Main orchestration script for all syncing
 - **sync-claude-commands.sh** ([`ai/sync-claude-commands.sh`](ai/sync-claude-commands.sh)): Updates Claude configuration
 - **sync-claude-prompts.sh** ([`ai/sync-claude-prompts.sh`](ai/sync-claude-prompts.sh)): Syncs prompts to Claude
 - **sync-claude-agents.sh** ([`ai/sync-claude-agents.sh`](ai/sync-claude-agents.sh)): Syncs agents to Claude
@@ -76,8 +75,8 @@ This automatically:
 ├── ai/                              # AI tooling and configuration
 │   ├── agents/                      # Specialized AI agents
 │   │   ├── docs-audit.md           # Documentation specialist
-│   │   ├── route-walkthrough.md    # API flow explainer
-│   │   └── general-explainer.md    # Code explainer
+│   │   ├── general-explainer.md    # Code explainer
+│   │   └── code-reviewer.md        # Code review assistant
 │   ├── prompts/                     # Reusable prompts
 │   │   └── task-manager.md         # Task management prompt
 │   ├── rules/                       # Global AI rules
@@ -85,13 +84,13 @@ This automatically:
 │   │   ├── git_workflows.md        # Git workflow rules
 │   │   └── task_lists.md           # Task management rules
 │   ├── ai-clone*                    # Main cloning script
-│   ├── sync-user-rules.sh*         # Rule synchronization
+│   ├── sync-agents.sh*             # Main sync orchestration
 │   ├── sync-claude-commands.sh*    # Claude command sync
 │   ├── sync-claude-prompts.sh*     # Prompt sync
 │   ├── sync-claude-agents.sh*      # Agent sync
 │   └── sync-or-create-project-rules.sh*  # Project rule setup
 ├── .claude/                         # Claude Code configuration
-│   └── settings.json               # Claude permissions
+│   └── settings.local.json         # Claude permissions
 └── .cursor/                         # Cursor IDE configuration
     └── rules/
         └── user-rules/              # Symlinked user rules

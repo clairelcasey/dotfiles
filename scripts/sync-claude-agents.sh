@@ -6,8 +6,8 @@
 set -e
 
 CLAUDE_DIR="$HOME/.claude"
-AI_DIR="$(dirname "$0")"
-AGENTS_DIR="$AI_DIR/agents"
+DOTFILES_DIR="$(dirname "$(dirname "$0")")"
+AGENTS_DIR="$DOTFILES_DIR/ai/agents"
 
 echo "🔄 Syncing agents to ~/.claude..."
 

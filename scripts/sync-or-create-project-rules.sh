@@ -3,7 +3,7 @@
 # sync-or-create-project-rules.sh
 #
 # Usage (inside a Git repo):
-#   ~/dotfiles/ai/sync-or-create-project-rules.sh
+#   ~/dotfiles/scripts/sync-or-create-project-rules.sh
 #
 # Ensures consistency between CLAUDE.md and .cursor/rules directory.
 # - If CLAUDE.md exists but .cursor/rules doesn't, creates symlink

@@ -51,42 +51,7 @@ color: "blue"
 - `DEVELOPMENT.md` - Setup, testing, contribution guides
 - `DEPLOYMENT.md` - Deployment instructions (if configs exist)
 
-### 2. route-walkthrough
-
-**Purpose**: API flow explainer optimized for monorepos and natural-language queries
-
-**Configuration**:
-```yaml
-name: route-walkthrough
-description: |
-  API-flow explainer. **Use PROACTIVELY** whenever the user asks what happens 
-  when an endpoint is hit, or requests architecture diagrams / docs for a 
-  specific code path. Optimised for monorepos, single-service repos, and 
-  natural-language queries.
-tools: Read, Grep, Glob, Bash, Write, Web
-color: "green"
-```
-
-**Capabilities**:
-- API endpoint flow analysis
-- Code path tracing
-- Architecture diagram generation
-- Cross-service interaction mapping
-
-**Use Cases**:
-- "What happens when endpoint X is hit?"
-- API documentation creation
-- Understanding request/response flows
-- Debugging API issues
-- Architecture visualization
-
-**Proactive Usage**: This agent should be used automatically when users ask about:
-- API endpoint behavior
-- Request flow analysis
-- Architecture documentation
-- Service interaction patterns
-
-### 3. general-explainer
+### 2. general-explainer
 
 **Purpose**: General-purpose code explanation and analysis
 
@@ -110,6 +75,30 @@ color: "purple"
 - Legacy code analysis
 - Educational code explanation
 
+### 3. code-reviewer
+
+**Purpose**: Code review assistance and quality analysis
+
+**Configuration**:
+```yaml
+name: code-reviewer
+description: Code review specialist for analyzing code quality and best practices
+tools: "Read, Grep, Glob, Write"
+color: "red"
+```
+
+**Capabilities**:
+- Code quality assessment
+- Best practices validation
+- Security vulnerability identification
+- Performance optimization suggestions
+
+**Use Cases**:
+- Pre-commit code reviews
+- Code quality audits
+- Security analysis
+- Performance reviews
+
 ## Agent Usage
 
 ### Invoking Agents
@@ -125,9 +114,9 @@ Agents are invoked automatically by Claude Code based on:
 | Task Type | Recommended Agent | Reason |
 |-----------|------------------|---------|
 | Documentation audit | docs-audit | Specialized documentation creation |
-| API flow analysis | route-walkthrough | API-specific expertise |
 | Code explanation | general-explainer | General code analysis |
-| Architecture docs | docs-audit or route-walkthrough | Depends on API focus |
+| Code review | code-reviewer | Quality and security analysis |
+| Architecture docs | docs-audit | System design expertise |
 
 ### Manual Agent Selection
 
@@ -138,7 +127,7 @@ While agents are typically selected automatically, you can request specific agen
 Please use the docs-audit agent to analyze this repository
 
 # Or describe the task that would trigger the agent
-I need to understand what happens when the /api/users endpoint is called
+I need to review this code for quality issues and best practices
 ```
 
 ## Agent Architecture
@@ -165,16 +154,16 @@ Each agent has access to specific tools only:
 | Agent | Tools | Security Rationale |
 |-------|-------|-------------------|
 | docs-audit | Read, Write, Glob, Grep, LS, Bash | Full access for comprehensive analysis |
-| route-walkthrough | Read, Grep, Glob, Bash, Write, Web | Web access for external API docs |
 | general-explainer | Read, Grep, Glob, Write | Limited to safe analysis tools |
+| code-reviewer | Read, Grep, Glob, Write | Safe analysis without system modification |
 
 ### Agent Distribution
 
-Agents are synchronized via [`sync-claude-agents.sh`](../ai/sync-claude-agents.sh):
+Agents are synchronized via [`sync-claude-agents.sh`](../scripts/sync-claude-agents.sh):
 
 ```bash
 # Sync agents to Claude Code
-~/dotfiles/ai/sync-claude-agents.sh
+~/dotfiles/scripts/sync-claude-agents.sh
 
 # Agents copied to ~/.claude/agents/
 ls ~/.claude/agents/
@@ -221,7 +210,7 @@ You are a specialized agent that performs [specific task].
 2. **Test Agent**:
    ```bash
    # Sync to Claude
-   ~/dotfiles/ai/sync-claude-agents.sh
+   ~/dotfiles/scripts/sync-claude-agents.sh
    
    # Test in Claude Code
    # Verify agent appears in agent list
@@ -266,7 +255,7 @@ You are a specialized agent that performs [specific task].
 
 2. **Sync Changes**:
    ```bash
-   ~/dotfiles/ai/sync-claude-agents.sh
+   ~/dotfiles/scripts/sync-claude-agents.sh
    ```
 
 3. **Test Updates**: Verify agent behavior meets expectations
@@ -305,7 +294,7 @@ ls ai/agents/agent-name.md
 ls ~/.claude/agents/
 
 # Re-sync if needed
-~/dotfiles/ai/sync-claude-agents.sh
+~/dotfiles/scripts/sync-claude-agents.sh
 ```
 
 ### Agent Behaving Incorrectly
@@ -337,7 +326,7 @@ tools: Read,Write,Grep      # Incorrect: comma-separated
 
 ### AI-Clone Integration
 
-Agents are automatically available in projects cloned via [`ai-clone`](../ai/ai-clone):
+Agents are automatically available in projects cloned via [`ai-clone`](../bin/ai-clone):
 
 ```bash
 # Clone repository with agent setup
@@ -360,7 +349,7 @@ Agents can be integrated into CI/CD pipelines:
 
 ```bash
 # Use docs-audit agent for automated documentation checks
-# Use route-walkthrough for API documentation generation
+# Use code-reviewer for automated code quality analysis
 # Use general-explainer for code review assistance
 ```
 
@@ -387,7 +376,7 @@ Agents can be integrated into CI/CD pipelines:
 
 - **Source**: `~/dotfiles/ai/agents/*.md`
 - **Deployed**: `~/.claude/agents/*.md`
-- **Sync Script**: [`~/dotfiles/ai/sync-claude-agents.sh`](../ai/sync-claude-agents.sh)
+- **Sync Script**: [`~/dotfiles/scripts/sync-claude-agents.sh`](../scripts/sync-claude-agents.sh)
 
 ### Related Documentation
 

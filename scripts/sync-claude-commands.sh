@@ -3,7 +3,7 @@
 # sync-claude-commands.sh
 #
 # Usage:
-#   ~/dotfiles/ai/sync-claude-commands.sh
+#   ~/dotfiles/scripts/sync-claude-commands.sh
 #
 # - Combines all markdown files from global/ directory
 # - Creates a unified ~/.claude/CLAUDE.md file with all rules
@@ -112,7 +112,7 @@ update_settings_json() {
   
   # Add additional pre-configured allowed commands (not in _global.md)
   allowed_commands+=(
-    "\"Bash(~/dotfiles/ai/sync-or-create-project-rules.sh:*)\""
+    "\"Bash(~/dotfiles/scripts/sync-or-create-project-rules.sh:*)\""
     "\"Bash(mv:*)\""
     "\"Bash(find:*)\""
     "\"Bash(git fetch:*)\""

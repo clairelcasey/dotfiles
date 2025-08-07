@@ -3,7 +3,7 @@
 # sync-claude-prompts.sh
 #
 # Usage:
-#   ~/dotfiles/ai/sync-claude-prompts.sh
+#   ~/dotfiles/scripts/sync-claude-prompts.sh
 #
 # - Combines all markdown files from prompts/ directory
 # - Updates ~/.claude/ with individual prompt files for Claude Code

@@ -3,7 +3,7 @@
 # sync-agents.sh
 #
 # Usage:
-#   ~/dotfiles/ai/sync-agents.sh
+#   ~/dotfiles/scripts/sync-agents.sh
 #
 # Orchestrates syncing of all Claude-related components:
 # - Claude prompts

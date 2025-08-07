@@ -39,7 +39,7 @@ Project Rules (.cursor/rules/ + CLAUDE.md)
 #### Rule Compilation Process
 
 1. **Source**: Individual `.md` files in [`ai/rules/`](../ai/rules/)
-2. **Compilation**: [`sync-user-rules.sh`](../ai/sync-user-rules.sh) combines rules
+2. **Compilation**: [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh) combines rules
 3. **Distribution**: Rules copied to both Cursor and Claude directories
 4. **Application**: AI assistants read rules for behavior guidance
 
@@ -49,9 +49,11 @@ The sync system uses a hierarchical approach:
 
 ```
 ai-clone (entry point)
-    ├── sync-claude-prompts.sh (prompts)
-    ├── sync-user-rules.sh (global rules)
-    │   └── sync-claude-commands.sh (Claude config)
+    ├── sync-agents.sh (orchestrates all syncing)
+    │   ├── sync-claude-prompts.sh (prompts)
+    │   ├── sync-claude-agents.sh (agents)
+    │   ├── sync-claude-commands.sh (rules)
+    │   └── sync-cursor-rules.sh (Cursor IDE rules)
     └── sync-or-create-project-rules.sh (project setup)
 ```
 
@@ -59,12 +61,13 @@ ai-clone (entry point)
 
 | Script | Purpose | Triggers |
 |--------|---------|----------|
-| [`ai-clone`](../ai/ai-clone) | Repository cloning + setup | Manual execution |
-| [`sync-user-rules.sh`](../ai/sync-user-rules.sh) | Global rule distribution | Called by ai-clone |
-| [`sync-claude-commands.sh`](../ai/sync-claude-commands.sh) | Claude configuration update | Called by sync-user-rules |
-| [`sync-claude-prompts.sh`](../ai/sync-claude-prompts.sh) | Prompt synchronization | Called by ai-clone |
-| [`sync-claude-agents.sh`](../ai/sync-claude-agents.sh) | Agent synchronization | Manual/called by others |
-| [`sync-or-create-project-rules.sh`](../ai/sync-or-create-project-rules.sh) | Project rule setup | Called by ai-clone |
+| [`ai-clone`](../bin/ai-clone) | Repository cloning + setup | Manual execution |
+| [`sync-agents.sh`](../scripts/sync-agents.sh) | Main sync orchestration | Called by ai-clone |
+| [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh) | Claude configuration update | Called by sync-agents |
+| [`sync-claude-prompts.sh`](../scripts/sync-claude-prompts.sh) | Prompt synchronization | Called by sync-agents |
+| [`sync-claude-agents.sh`](../scripts/sync-claude-agents.sh) | Agent synchronization | Called by sync-agents |
+| [`sync-cursor-rules.sh`](../scripts/sync-cursor-rules.sh) | Cursor IDE rule sync | Called by sync-agents |
+| [`sync-or-create-project-rules.sh`](../scripts/sync-or-create-project-rules.sh) | Project rule setup | Called by ai-clone |
 
 ### 3. Agent System Architecture
 
@@ -84,8 +87,8 @@ color: "color-code"
 | Agent | Specialization | Tools | Use Case |
 |-------|---------------|-------|----------|
 | [docs-audit](../ai/agents/docs-audit.md) | Documentation analysis | Read, Write, Glob, Grep, LS, Bash | Repository documentation audits |
-| [route-walkthrough](../ai/agents/route-walkthrough.md) | API flow explanation | Read, Grep, Glob, Bash, Write, Web | API architecture documentation |
 | [general-explainer](../ai/agents/general-explainer.md) | Code explanation | Read, Grep, Glob, Write | General code analysis |
+| [code-reviewer](../ai/agents/code-reviewer.md) | Code review assistance | Read, Grep, Glob, Write | Code quality analysis |
 
 ## Data Flow
 
@@ -96,13 +99,13 @@ User runs: ai-clone git@host:user/repo.git
     ↓
 Clone repository to target directory
     ↓
-Sync Claude prompts (sync-claude-prompts.sh)
-    ↓
-Sync global rules (sync-user-rules.sh)
-    ├── Compile rules into personal-global.mdc
-    ├── Create individual .mdc files
-    ├── Update ~/.claude/CLAUDE.md
-    └── Call sync-claude-commands.sh
+Run sync-agents.sh
+    ├── Sync Claude prompts (sync-claude-prompts.sh)
+    ├── Sync Claude agents (sync-claude-agents.sh)
+    ├── Sync global rules (sync-claude-commands.sh)
+    │   ├── Compile rules into ~/.claude/CLAUDE.md
+    │   └── Update Claude configuration
+    └── Sync Cursor rules (sync-cursor-rules.sh)
     ↓
 Setup project rules (sync-or-create-project-rules.sh)
     ├── Create .cursor/rules/ if needed
@@ -117,7 +120,7 @@ Repository ready for development
 ```
 User modifies ~/dotfiles/ai/rules/*.md
     ↓
-Run sync-user-rules.sh (manual or via ai-clone)
+Run sync-claude-commands.sh (manual or via sync-agents)
     ↓
 Rules compiled and distributed to:
     ├── ~/.claude/CLAUDE.md (unified file)
@@ -149,7 +152,7 @@ The system integrates with Claude Code through:
 1. **Configuration File**: `~/.claude/CLAUDE.md` contains all rules
 2. **Agent Files**: `~/.claude/agents/` contains agent definitions
 3. **Prompt Files**: `~/.claude/*.prompt` contains reusable prompts
-4. **Permissions**: `.claude/settings.json` defines allowed operations
+4. **Permissions**: `.claude/settings.local.json` defines allowed operations
 
 ### Cursor IDE Integration
 
@@ -184,7 +187,7 @@ Rules define allowed/forbidden commands:
 
 ### Permission System
 
-Claude Code permissions in `.claude/settings.json`:
+Claude Code permissions in `.claude/settings.local.json`:
 
 ```json
 {
@@ -204,19 +207,19 @@ Claude Code permissions in `.claude/settings.json`:
 ### Adding New Rules
 
 1. Create `.md` file in [`ai/rules/`](../ai/rules/)
-2. Run [`sync-user-rules.sh`](../ai/sync-user-rules.sh)
+2. Run [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh)
 3. Rules automatically distributed to all projects
 
 ### Adding New Agents
 
 1. Create agent file in [`ai/agents/`](../ai/agents/)
-2. Run [`sync-claude-agents.sh`](../ai/sync-claude-agents.sh)
+2. Run [`sync-claude-agents.sh`](../scripts/sync-claude-agents.sh)
 3. Agent available in Claude Code
 
 ### Adding New Prompts
 
 1. Create `.md` file in [`ai/prompts/`](../ai/prompts/)
-2. Run [`sync-claude-prompts.sh`](../ai/sync-claude-prompts.sh)
+2. Run [`sync-claude-prompts.sh`](../scripts/sync-claude-prompts.sh)
 3. Prompt available as `.prompt` file in Claude
 
 ## Error Handling

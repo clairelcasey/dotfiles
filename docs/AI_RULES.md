@@ -151,7 +151,7 @@ Session Rules (temporary overrides)
 ### Rule Compilation Process
 
 1. **Source Files**: Individual `.md` files in [`ai/rules/`](../ai/rules/)
-2. **Compilation**: [`sync-claude-commands.sh`](../ai/sync-claude-commands.sh) combines all rules
+2. **Compilation**: [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh) combines all rules
 3. **Output**: Unified `~/.claude/CLAUDE.md` file
 4. **Distribution**: Individual `.mdc` files in project `.cursor/rules/user-rules/`
 
@@ -163,10 +163,10 @@ Session Rules (temporary overrides)
 vim ~/dotfiles/ai/rules/rule_name.md
 
 # Sync to all systems
-~/dotfiles/ai/sync-claude-commands.sh
+~/dotfiles/scripts/sync-claude-commands.sh
 
-# Apply to current project
-~/dotfiles/ai/sync-user-rules.sh
+# Apply to current project via sync-agents
+~/dotfiles/scripts/sync-agents.sh
 ```
 
 **Project Rule Changes**:
@@ -182,7 +182,7 @@ Rules are enforced through:
 
 1. **Configuration File**: `~/.claude/CLAUDE.md` contains all rules
 2. **Front-matter Metadata**: Rules have `alwaysApply: true` directive
-3. **Permission System**: `.claude/settings.json` defines allowed operations
+3. **Permission System**: `.claude/settings.local.json` defines allowed operations
 
 ### Cursor IDE Integration
 
@@ -219,13 +219,13 @@ Rules are enforced through:
 
 2. **Sync Rules**:
    ```bash
-   ~/dotfiles/ai/sync-claude-commands.sh
+   ~/dotfiles/scripts/sync-claude-commands.sh
    ```
 
 3. **Apply to Projects**:
    ```bash
    cd /path/to/project
-   ~/dotfiles/ai/sync-user-rules.sh
+   ~/dotfiles/scripts/sync-agents.sh
    ```
 
 ### Modifying Existing Rules
@@ -238,7 +238,7 @@ Rules are enforced through:
 2. **Test Changes**:
    ```bash
    # Check compilation
-   ~/dotfiles/ai/sync-claude-commands.sh
+   ~/dotfiles/scripts/sync-claude-commands.sh
    
    # Verify output
    grep -A 10 "existing_rule" ~/.claude/CLAUDE.md
@@ -248,7 +248,7 @@ Rules are enforced through:
    ```bash
    # Apply to all future projects (automatic)
    # Apply to current project
-   ~/dotfiles/ai/sync-user-rules.sh
+   ~/dotfiles/scripts/sync-agents.sh
    ```
 
 ### Rule Precedence
@@ -304,8 +304,8 @@ cat CLAUDE.md
 **Re-sync Rules**:
 ```bash
 # Force re-sync
-~/dotfiles/ai/sync-claude-commands.sh
-cd /path/to/project && ~/dotfiles/ai/sync-user-rules.sh
+~/dotfiles/scripts/sync-claude-commands.sh
+cd /path/to/project && ~/dotfiles/scripts/sync-agents.sh
 ```
 
 ### Rule Conflicts

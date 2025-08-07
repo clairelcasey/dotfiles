@@ -15,41 +15,50 @@ This guide covers development setup, testing, and contribution guidelines for th
 ### Initial Development Setup
 
 1. **Clone the Repository**:
+
    ```bash
    git clone <repository-url> ~/dotfiles-dev
    cd ~/dotfiles-dev
    ```
 
 2. **Make Scripts Executable**:
+
    ```bash
-   chmod +x ai/*.sh ai/ai-clone
+   chmod +x scripts/*.sh bin/ai-clone
    ```
 
 3. **Set Up Development Environment**:
+
    ```bash
    # Add to your shell profile for testing
-   export PATH="$HOME/dotfiles-dev/ai:$PATH"
+   export PATH="$HOME/dotfiles-dev/scripts:$HOME/dotfiles-dev/bin:$PATH"
    ```
 
 4. **Test Basic Functionality**:
    ```bash
    # Test rule compilation
-   ./ai/sync-claude-commands.sh
-   
-   # Test user rule sync
-   ./ai/sync-user-rules.sh
+   ./scripts/sync-claude-commands.sh
+
+   # Test agent sync
+   ./scripts/sync-claude-agents.sh
+
+   # Test main orchestration
+   ./scripts/sync-agents.sh
    ```
 
 ## Project Structure
 
 ```
 ~/dotfiles/
-├── ai/                              # Core AI tooling
+├── ai/                              # AI configuration and data
 │   ├── agents/                      # Agent definitions
-│   ├── prompts/                     # Reusable prompts  
+│   ├── prompts/                     # Reusable prompts
 │   ├── rules/                       # Global rules
-│   ├── ai-clone*                    # Main entry script
-│   └── sync-*.sh*                   # Synchronization scripts
+│   └── config/                      # AI tool configurations
+├── scripts/                         # Executable synchronization scripts
+│   └── sync-*.sh*                   # All sync scripts
+├── bin/                             # Utility binaries
+│   └── ai-clone*                    # Main entry script
 ├── docs/                           # Documentation
 ├── .claude/                        # Claude Code config
 └── .cursor/                        # Cursor IDE config
@@ -64,7 +73,7 @@ This guide covers development setup, testing, and contribution guidelines for th
 ```bash
 # Test rule compilation
 cd ~/dotfiles
-./ai/sync-claude-commands.sh
+./scripts/sync-claude-commands.sh
 
 # Verify output
 cat ~/.claude/CLAUDE.md
@@ -73,7 +82,7 @@ cat ~/.claude/CLAUDE.md
 mkdir /tmp/test-project
 cd /tmp/test-project
 git init
-~/dotfiles/ai/sync-user-rules.sh
+~/dotfiles/scripts/sync-agents.sh
 
 # Check rule files created
 ls -la .cursor/rules/user-rules/
@@ -95,7 +104,7 @@ cat CLAUDE.md
 
 ```bash
 # Test agent sync
-./ai/sync-claude-agents.sh
+./scripts/sync-claude-agents.sh
 
 # Verify agents available
 ls -la ~/.claude/agents/
@@ -190,24 +199,26 @@ fi
 ### Adding a New Global Rule
 
 1. **Create Rule File**:
+
    ```bash
    # Create new rule file
    cat > ai/rules/new_feature.md << 'EOF'
    # New Feature Rules
-   
+
    ## Rule Category
-   
+
    - Specific rule 1
    - Specific rule 2
-   
+
    EOF
    ```
 
 2. **Test Rule Integration**:
+
    ```bash
    # Test compilation
-   ./ai/sync-claude-commands.sh
-   
+   ./scripts/sync-claude-commands.sh
+
    # Verify in output
    grep -A 5 "new_feature" ~/.claude/CLAUDE.md
    ```
@@ -215,13 +226,14 @@ fi
 3. **Test in Project Context**:
    ```bash
    cd /tmp/test-project
-   ~/dotfiles/ai/sync-user-rules.sh
+   ~/dotfiles/scripts/sync-agents.sh
    ls .cursor/rules/user-rules/new_feature.mdc
    ```
 
 ### Adding a New Agent
 
 1. **Create Agent File**:
+
    ```bash
    cat > ai/agents/new-agent.md << 'EOF'
    ---
@@ -230,35 +242,36 @@ fi
    tools: "Read, Write, Grep"
    color: "blue"
    ---
-   
+
    # Agent Instructions
-   
+
    You are a specialized agent that...
    EOF
    ```
 
 2. **Sync and Test**:
    ```bash
-   ./ai/sync-claude-agents.sh
+   ./scripts/sync-claude-agents.sh
    ls ~/.claude/agents/new-agent.md
    ```
 
 ### Adding a New Sync Script
 
 1. **Create Script**:
+
    ```bash
-   cat > ai/sync-new-feature.sh << 'EOF'
+   cat > scripts/sync-new-feature.sh << 'EOF'
    #!/usr/bin/env bash
    set -euo pipefail
-   
+
    # Script implementation
    EOF
-   chmod +x ai/sync-new-feature.sh
+   chmod +x scripts/sync-new-feature.sh
    ```
 
 2. **Integrate with Existing Scripts**:
-   - Add call to [`ai-clone`](../ai/ai-clone) if needed during setup
-   - Add call to [`sync-user-rules.sh`](../ai/sync-user-rules.sh) if related to rules
+   - Add call to [`ai-clone`](../bin/ai-clone) if needed during setup
+   - Add call to [`sync-agents.sh`](../scripts/sync-agents.sh) if related to main workflow
 
 ## Debugging
 
@@ -308,11 +321,11 @@ Enable debug output in scripts:
 
 ```bash
 # Run with debug output
-bash -x ai/sync-user-rules.sh
+bash -x ai/sync-agents.sh
 
 # Or set in environment
 export BASH_DEBUG=1
-./ai/sync-user-rules.sh
+./ai/sync-agents.sh
 ```
 
 ### Log Analysis
@@ -327,7 +340,7 @@ Scripts output status messages:
 ✅ User rules synced and linked
 
 # Check for error patterns
-./ai/sync-user-rules.sh 2>&1 | grep -E "(Error|❌|Failed)"
+./ai/sync-agents.sh 2>&1 | grep -E "(Error|❌|Failed)"
 ```
 
 ## Performance Testing
@@ -336,7 +349,7 @@ Scripts output status messages:
 
 ```bash
 # Time rule compilation
-time ./ai/sync-claude-commands.sh
+time ./scripts/sync-claude-commands.sh
 
 # Check output file sizes
 ls -lh ~/.claude/CLAUDE.md
@@ -360,6 +373,7 @@ time ai-clone git@github.com:user/large-repo.git /tmp/large-test-2
 ### Pull Request Process
 
 1. **Create Feature Branch**:
+
    ```bash
    git checkout -b feature/new-enhancement
    ```
@@ -367,11 +381,12 @@ time ai-clone git@github.com:user/large-repo.git /tmp/large-test-2
 2. **Make Changes** following code guidelines
 
 3. **Test Changes**:
+
    ```bash
    # Test all affected scripts
-   ./ai/sync-claude-commands.sh
-   ./ai/sync-user-rules.sh
-   
+   ./scripts/sync-claude-commands.sh
+   ./scripts/sync-agents.sh
+
    # Test in clean environment
    ai-clone git@github.com:test/repo.git /tmp/test-pr
    ```
@@ -418,10 +433,10 @@ rm -rf ~/.claude/CLAUDE.md ~/.claude/agents/
 
 # Re-sync everything
 cd ~/dotfiles
-./ai/sync-claude-commands.sh
-./ai/sync-claude-agents.sh
+./scripts/sync-claude-commands.sh
+./scripts/sync-claude-agents.sh
 
 # Re-sync in project
 cd /path/to/project
-~/dotfiles/ai/sync-user-rules.sh
+~/dotfiles/scripts/sync-agents.sh
 ```

@@ -3,9 +3,9 @@
 # sync-cursor-rules.sh
 #
 # Usage (inside a Git repo):
-#   ~/dotfiles/ai/sync-cursor-rules.sh
+#   ~/dotfiles/scripts/sync-cursor-rules.sh
 #
-# - Creates or updates ~/dotfiles/ai/personal-global.mdc
+# - Creates or updates ~/dotfiles/ai/config/personal-global.mdc
 #   by concatenating **all** markdown rule files found in
 #   ~/dotfiles/ai/rules/ (alphabetical order).
 # - Symlinks that file into .cursor/rules/user-rules/ in
@@ -17,7 +17,7 @@ set -euo pipefail
 
 AI_RULE_DIR="$HOME/dotfiles/ai"
 RULES_DIR="$AI_RULE_DIR/rules"
-COMBINED="$AI_RULE_DIR/personal-global.mdc"
+COMBINED="$AI_RULE_DIR/config/personal-global.mdc"
 DEST_SUBDIR=".cursor/rules/user-rules"
 DEST_FILE="personal-global.mdc"
 
