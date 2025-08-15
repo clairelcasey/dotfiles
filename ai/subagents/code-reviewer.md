@@ -21,6 +21,11 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    # Ensure we have the latest default branch
    git fetch origin
 
+   # Get current branch name and create tmp file with branch name
+   CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+   mkdir -p tmp
+   echo "$CURRENT_BRANCH" > tmp/current_branch.txt
+
    # Detect default branch name (master vs main)
    DEFAULT=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD \
              | sed 's@^origin/@@')

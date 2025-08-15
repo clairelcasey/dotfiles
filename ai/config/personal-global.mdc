@@ -62,11 +62,16 @@ alwaysApply: true
 - `echo`
 - `mkdir -p tmp`
 
+## Commands Requiring Explicit Confirmation
+
+- `rm` (and any variant such as `rm -rf`, `rimraf`, etc.) - **Always request explicit confirmation before executing**
+- Any command that modifies or deletes files permanently
+
 ## Forbidden Commands
 
-- `rm` (and any variant such as `rm -rf`, `rimraf`, etc.)
+- None (all commands may be executed with appropriate confirmation)
 
-> The assistant should refuse or request explicit confirmation from the user before attempting to run any command not listed as "Always Allowed" and must **never** run forbidden commands.
+> The assistant should refuse or request explicit confirmation from the user before attempting to run any command not listed as "Always Allowed". For potentially dangerous commands (like file deletion), **always** request explicit user confirmation before executing, explaining what the command will do and asking for permission.
 
 
 
