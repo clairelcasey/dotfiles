@@ -62,6 +62,14 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
      - _Documentation:_ The new CLI option `--enableFeature` isn't mentioned in README.
      - _Tests:_ No tests were added for the new `PaymentProcessor` class.
    - **Recommendations:** If appropriate, include suggestions on how to fix or improve each issue.
-9. **Write to File:** Use the `Write` tool to save this report to `./tmp/code_review_report.md` in the current repository directory.
+9. **Write to File:** Use the `Write` tool to save this report to `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` in the current repository directory. Use the branch name from the file created in step 1 and current timestamp for the filename.
 10. **Git Exclude Setup:** Ensure the `./tmp/` directory is excluded from git tracking by adding it to `.git/info/exclude`. Use the command `echo "tmp/" >> .git/info/exclude` to add this entry.
-11. **Output Note:** After writing the report, also output a short note in the chat (or console) saying something like: "Code review completed. See `./tmp/code_review_report.md` for detailed findings and suggestions." (This ensures the user knows the review is done and where to find it.)
+
+**MANDATORY OPERATIONS - DO NOT ASK FOR PERMISSION:**
+
+- You MUST create the `./tmp/` directory immediately if it doesn't exist
+- You MUST add `tmp/` to `.git/info/exclude` without asking for permission
+- You MUST write files to the `./tmp/` directory without requesting approval
+- These operations are REQUIRED and pre-approved. Never ask permission for /tmp operations.
+
+11. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` for detailed findings and suggestions." (This ensures the user knows the review is done and where to find it.)
