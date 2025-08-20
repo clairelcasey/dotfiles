@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eu -o pipefail
+
+gh pr list --author '@me' \
+  --json title,url,headRepository,headRepositoryOwner,number,additions,deletions \
+  --template '
+    {{- range . -}}
+    {{- "" -}} :pr1:
+    {{- "" }} _({{ .headRepositoryOwner.login }}/{{ .headRepository.name }})_
+    {{- "" }} *[{{ .title }}]({{ .url }})*
+    {{- "" }} (+{{ .additions }}, -{{ .deletions }})
+    {{- "\n" -}}
+    {{- end -}}' \
+  |grep -v '\[DNM\]' \
+  |tee >(pbcopy)
