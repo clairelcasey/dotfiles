@@ -53,6 +53,7 @@
 - `id`
 - `echo`
 - `mkdir -p tmp`
+- `acli jira workitem`
 
 ## Commands Requiring Explicit Confirmation
 
