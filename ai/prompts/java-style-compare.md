@@ -105,10 +105,11 @@ Now, **use the `java-style-writer` subagent** to produce a comprehensive, develo
 1. **Framework Summary** (Apollo vs Spring, DI patterns)
 2. **Code Examples** (✅ Good, ❌ Avoid, 💡 Why)
 3. **Testing Strategy** (JUnit, Mockito, Testcontainers)
-4. **Async & Observability** (timeouts, metrics, logging)
-5. **Anti-patterns** (with specific file references and fixes)
-6. **Visual Elements** (tables and Mermaid diagrams)
-7. **PR Checklist** (actionable items for code review)
+4. **Database & Transactions** (JDBI patterns, transaction boundaries, connection pooling)
+5. **Async & Observability** (timeouts, metrics, logging)
+6. **Anti-patterns** (with specific file references and fixes)
+7. **Visual Elements** (tables and Mermaid diagrams)
+8. **PR Checklist** (actionable items for code review)
 
 After the subagent completes, the AI style guide will be saved to: `./tmp/java-style-ai-${TIMESTAMP}.md`
 
@@ -127,6 +128,13 @@ Compare scanner vs AI guide:
 - 📝 **Qualitative**: AI guide provides context for Z% of detected patterns
 - 🎯 **Examples**: AI guide includes concrete examples for [list categories]
 
+**Database Analysis:**
+- 🗄️ **Database Technology**: [JDBI/JPA/Plain JDBC identified]
+- 🔄 **Transaction Patterns**: [Transaction boundary analysis]
+- 🏊 **Connection Pooling**: [HikariCP configuration review]
+- 📊 **Query Patterns**: [SQL best practices and anti-patterns]
+- 🧪 **Database Testing**: [Testcontainers and migration testing]
+
 ### B. Quality Assessment
 
 **New Developer Readiness:**
@@ -135,6 +143,8 @@ Compare scanner vs AI guide:
 - ✅ Provides actionable PR checklist
 - ✅ Covers Spotify-specific patterns (Apollo, Dagger, etc.)
 - ✅ Includes visual aids (tables and diagrams)
+- ✅ Documents database patterns and transaction boundaries
+- ✅ Provides connection pool configuration guidance
 
 **Gaps to Address:**
 - [List any areas where more examples would help]
@@ -162,10 +172,13 @@ Combine the best of both approaches into a comprehensive guide with enhanced vis
 [Side-by-side comparison: Scanner vs AI Analysis]
 
 ## 📝 Code Examples by Category
-[Frameworks, Testing, Async, etc. with ✅/❌ examples]
+[Frameworks, Testing, Database, Async, etc. with ✅/❌ examples]
+
+## 🗄️ Database & Transaction Patterns
+[JDBI usage, transaction boundaries, connection pooling, SQL best practices]
 
 ## 📈 Visual Architecture Diagrams
-[Mermaid diagrams showing service dependencies and flows]
+[Mermaid diagrams showing service dependencies, transaction flows, and connection pools]
 
 ## 🚨 Common Anti-patterns
 [File:line examples with fixes]

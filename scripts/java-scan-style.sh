@@ -118,6 +118,14 @@ declare -a PATTERNS=(
   "Spotify Internal:bender=com\\.spotify\\.bender|pubsub-utils"
   "Spotify Internal:contentcontrol=com\\.spotify\\.contentcontrol"
   "Spotify Internal:pubsub_wrapper=com\\.spotify\\.pubsubwrapper"
+  "Spotify Internal:apollo_error_mapping=GrpcStatusMapperUtil|statusFromException"
+  "Spotify Internal:spotify_config=@Named.*Spotify|SPOTIFY_|spotify\\."
+  "Spotify Internal:hermes_messaging=apolloRequestFromHermesMessage|HermesMessageUtil"
+  
+  # Security & Configuration
+  "Security & Config:secrets_management=@Secret|SecretsClient|credential"
+  "Security & Config:input_validation=@Valid|@NotNull|@NotBlank|validateInput|isRequestValid"
+  "Security & Config:auth_patterns=@PreAuthorize|SecurityContext|Authentication"
   
   # gRPC & Protocol Buffers
   "RPC & Serialization:grpc=io\\.grpc|@GrpcService|apollo-grpc"
@@ -127,6 +135,12 @@ declare -a PATTERNS=(
   "Database & Persistence:jpa=@(Entity|Repository|Table|Column)\\b|javax\\.persistence"
   "Database & Persistence:flyway=\\bflyway\\b|V[0-9]+.*\\.sql"
   "Database & Persistence:hikari=HikariDataSource|HikariCP"
+  "Database & Persistence:jdbi=org\\.jdbi|@(SqlQuery|SqlUpdate|RegisterRowMapper|UseRowMapper)\\b"
+  "Database & Persistence:transactions=executeInTransaction|@Transaction\\b|useTransaction|inTransaction"
+  "Database & Persistence:liquibase=\\bliquibase\\b|changeset|JdbiLiquibase"
+  "Database & Persistence:connection_pool=HikariConfig|maximumPoolSize|minimumIdle|connectionTimeout"
+  "Database & Persistence:dao_patterns=\\bDao\\b.*interface|SqlObject"
+  "Database & Persistence:row_mappers=RowMapper|ResultSetMapper|@RegisterRowMapper"
 )
 
 # Anti-patterns
@@ -137,6 +151,11 @@ declare -a ANTI_PATTERNS=(
   "new\\s+ObjectMapper\\s*\\("       ":: Avoid raw ObjectMapper; use a shared, configured instance."
   "Thread\\s*\\.sleep\\s*\\("        ":: Avoid Thread.sleep in prod/tests; use Awaitility or proper synchronization."
   "System\\.out\\.print"             ":: Avoid System.out; use SLF4J logging."
+  "SELECT\\s+\\*\\s+FROM"            ":: Avoid SELECT *; specify columns explicitly for better performance."
+  "\\+.*\\+.*WHERE"                  ":: Potential SQL injection risk; use parameterized queries."
+  "new\\s+.*Connection\\s*\\("       ":: Avoid manual connection management; use connection pools."
+  "executeQuery\\s*\\(.*\\+.*\\)"    ":: SQL concatenation detected; use parameterized queries."
+  "Statement\\s+.*=.*createStatement" ":: Use PreparedStatement instead of Statement for better security."
 )
 
 # Helper: run search respecting file extensions
@@ -370,7 +389,7 @@ mkdir -p "$(dirname "$OUT")"
   for group in "Frameworks & Dependency Injection" "Testing" "Async & Concurrency" \
                "REST, Validation & Errors" "Observability & Logging" \
                "Build, Config & Quality Gates" "Language Features & Libraries" \
-               "Spotify Internal" "RPC & Serialization" "Database & Persistence"; do
+               "Spotify Internal" "Security & Config" "RPC & Serialization" "Database & Persistence"; do
     
     echo "### $group"
     

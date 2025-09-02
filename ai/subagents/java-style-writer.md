@@ -35,14 +35,23 @@ For each pattern detected, include:
 - **Integration Testing**: Testcontainers, Apollo test utilities
 - **Mocking**: Mockito patterns, when to mock vs real objects
 
-### 4. Async & Observability
+### 4. Database & Transactions
+
+- **Database Technology**: JDBI vs JPA vs plain JDBC comparison and rationale
+- **Transaction Management**: Transaction boundaries, isolation levels, rollback strategies
+- **Connection Pooling**: HikariCP configuration, pool sizing, timeout settings
+- **Query Patterns**: SQL best practices, parameterized queries, performance optimization
+- **Database Testing**: Testcontainers setup, test data management, migration testing
+- **Schema Management**: Liquibase/Flyway patterns, versioning, rollback strategies
+
+### 5. Async & Observability
 
 - **CompletableFuture vs Reactive**: When to use each approach
 - **Timeouts & Retries**: Essential patterns for resilient services
 - **Metrics & Tracing**: Apollo metrics, OpenTelemetry setup
 - **Logging**: Structured logging with correlation IDs
 
-### 5. Detailed Anti-patterns
+### 6. Detailed Anti-patterns
 
 Include file:line examples and specific fixes for:
 
@@ -51,15 +60,24 @@ Include file:line examples and specific fixes for:
 - Synchronous calls in async handlers
 - Missing error handling
 - Resource leaks
+- Database anti-patterns:
+  - SELECT * queries instead of specific columns
+  - SQL injection vulnerabilities
+  - Missing transaction boundaries
+  - Connection leaks
+  - N+1 query problems
+  - Unbounded result sets
 
-### 6. Spotify-Specific Guidelines
+### 7. Spotify-Specific Guidelines
 
 - **Service Architecture**: How this service fits in the ecosystem
 - **Data Flow**: Typical request/response patterns
 - **Error Handling**: Apollo error mapping, problem+json
 - **Configuration**: Environment-specific config management
+- **Internal Libraries**: Bender validation, ContentControl, PubSub patterns
+- **Apollo Integration**: gRPC interceptors, metrics collection, error mapping
 
-### 7. Visual Elements & Tables
+### 8. Visual Elements & Tables
 
 Include for better understanding:
 
@@ -69,8 +87,10 @@ Include for better understanding:
   - Component relationships (classDiagram for DI structure)
   - Async flow patterns (sequence diagram for request handling)
   - Framework comparison (graph showing Apollo vs Spring usage)
+  - Database transaction flow (sequence diagram showing transaction boundaries)
+  - Connection pool lifecycle (state diagram)
 
-### 8. Practical PR Checklist
+### 9. Practical PR Checklist
 
 End with an actionable checklist covering:
 
@@ -78,6 +98,12 @@ End with an actionable checklist covering:
 - Documentation requirements
 - Security considerations
 - Performance implications
+- Database considerations:
+  - Transaction boundaries properly defined
+  - SQL queries use parameterized statements
+  - Connection pools configured appropriately
+  - Database migrations tested and versioned
+  - Query performance reviewed for large datasets
 
 ## Instructions
 
