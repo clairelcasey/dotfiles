@@ -46,7 +46,14 @@ For each pattern detected, include:
 
 ### 5. Async & Observability
 
-- **CompletableFuture vs Reactive**: When to use each approach
+- **CompletableFuture Best Practices**: Reference `/Users/ccasey/dotfiles/ai/guides/completable-future.md` for comprehensive guidance on:
+  - Non-blocking composition (avoid `.get()` and `.join()`)
+  - Proper chaining with `thenCompose`, `thenCombine`, `thenApply`
+  - Error handling with `exceptionally` and `handle`
+  - Thread pool management and custom executors
+  - API design with `CompletionStage` parameters
+  - Timeout handling with `orTimeout` and `completeOnTimeout`
+- **CompletableFuture vs Reactive**: When to use each approach, decision criteria
 - **Timeouts & Retries**: Essential patterns for resilient services
 - **Metrics & Tracing**: Apollo metrics, OpenTelemetry setup
 - **Logging**: Structured logging with correlation IDs
@@ -60,6 +67,12 @@ Include file:line examples and specific fixes for:
 - Synchronous calls in async handlers
 - Missing error handling
 - Resource leaks
+- **CompletableFuture Anti-patterns**:
+  - Blocking calls (`.get()`, `.join()`) in application logic
+  - Missing custom executors for blocking operations
+  - Poor error handling (no `.exceptionally()` or `.handle()`)
+  - Using `CompletableFuture` in APIs instead of `CompletionStage`
+  - Missing timeout specifications
 - Database anti-patterns:
   - SELECT * queries instead of specific columns
   - SQL injection vulnerabilities
@@ -104,6 +117,12 @@ End with an actionable checklist covering:
   - Connection pools configured appropriately
   - Database migrations tested and versioned
   - Query performance reviewed for large datasets
+- **Async code considerations**:
+  - No blocking calls (`.get()`, `.join()`) in application logic
+  - Custom executors used for blocking operations
+  - Proper error handling with `.exceptionally()` or `.handle()`
+  - Timeout specifications included for async operations
+  - API methods use `CompletionStage` instead of `CompletableFuture`
 
 ## Instructions
 
@@ -112,6 +131,8 @@ End with an actionable checklist covering:
 - **Show Code**: Include concrete examples from the repository
 - **Be Practical**: Focus on actionable advice for day-to-day development
 - **Use Visuals**: Include tables and Mermaid diagrams for complex concepts
-- **Output File**: Save your - style guide to `./tmp/java-style-ai-{timestamp}.md`
+- **Developer Focus**: Optimize for backend developer onboarding and daily reference
+- **Include Spotify Context**: Reference Apollo, Dagger, and internal libraries as appropriate
+- **Output File**: Save your style guide to `./tmp/java-style-ai-{timestamp}.md`
 - Generate a timestamp using `date +%Y%m%d_%H%M%S` for the filename
 - If uncertain about a pattern, state your recommendation and mark it as [TODO: Verify with team]

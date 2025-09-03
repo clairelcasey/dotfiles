@@ -77,9 +77,14 @@ declare -a PATTERNS=(
 
   # Async & Concurrency
   "Async & Concurrency:async=CompletableFuture<|ExecutorService|@Async\\b"
+  "Async & Concurrency:cf_blocking=\\.get\\(\\)|\\.join\\(\\)"
+  "Async & Concurrency:cf_composition=\\.thenCompose\\(|\\.thenCombine\\(|\\.thenApply\\(|\\.thenAccept\\("
+  "Async & Concurrency:cf_error_handling=\\.exceptionally\\(|\\.handle\\("
+  "Async & Concurrency:cf_executors=\\.thenApplyAsync\\(|\\.thenComposeAsync\\(|Executors\\."
+  "Async & Concurrency:cf_completion_stage=CompletionStage<"
   "Async & Concurrency:reactor=reactor\\.core\\.publisher\\.(Mono|Flux)|\\bMono<|\\bFlux<"
   "Async & Concurrency:rxjava=io\\.reactivex|Observable<|Single<|Flowable<"
-  "Async & Concurrency:timeouts=\\.timeout\\(|@Timeout|readTimeout|connectTimeout"
+  "Async & Concurrency:timeouts=\\.timeout\\(|@Timeout|readTimeout|connectTimeout|orTimeout\\(|completeOnTimeout\\("
   "Async & Concurrency:resilience=resilience4j|\\bCircuitBreaker\\b|\\bRetry\\b|\\bBulkhead\\b"
   "Async & Concurrency:http_client=\\bWebClient\\b|\\bRestTemplate\\b|\\bHttpClient\\b|\\bOkHttpClient\\b"
   "Async & Concurrency:db_pool=HikariDataSource|HikariCP"
@@ -350,12 +355,32 @@ mkdir -p "$(dirname "$OUT")"
   async_count="$(get_count "async")"
   timeouts_count="$(get_count "timeouts")"
   http_client_count="$(get_count "http_client")"
+  cf_blocking_count="$(get_count "cf_blocking")"
+  cf_composition_count="$(get_count "cf_composition")"
+  cf_error_handling_count="$(get_count "cf_error_handling")"
+  cf_executors_count="$(get_count "cf_executors")"
+  cf_completion_stage_count="$(get_count "cf_completion_stage")"
   
   if [[ "$reactor_count" -gt 0 && "$async_count" -gt 0 ]]; then
     echo "- **Async & Concurrency:** Mixed reactive and CompletableFuture APIs; document when to choose each."
   fi
   if [[ "$timeouts_count" -eq 0 && ( "$http_client_count" -gt 0 || "$reactor_count" -gt 0 ) ]]; then
     echo "- **Async & Concurrency:** HTTP/reactive usage without obvious timeouts; add timeout guidance."
+  fi
+  if [[ "$cf_blocking_count" -gt 0 ]]; then
+    echo "- **CompletableFuture Anti-pattern:** Found $cf_blocking_count blocking calls (.get()/.join()); consider non-blocking composition instead."
+  fi
+  if [[ "$async_count" -gt 0 && "$cf_composition_count" -eq 0 ]]; then
+    echo "- **CompletableFuture:** Using CompletableFuture but no composition methods detected; verify proper async patterns."
+  fi
+  if [[ "$async_count" -gt 0 && "$cf_error_handling_count" -eq 0 ]]; then
+    echo "- **CompletableFuture:** Using CompletableFuture but no error handling (.exceptionally/.handle) detected."
+  fi
+  if [[ "$cf_executors_count" -eq 0 && "$async_count" -gt 0 ]]; then
+    echo "- **CompletableFuture:** No custom executors detected; ensure thread pool isolation for blocking operations."
+  fi
+  if [[ "$async_count" -gt 0 && "$cf_completion_stage_count" -eq 0 ]]; then
+    echo "- **CompletableFuture API Design:** Consider using CompletionStage in method parameters for safer API design."
   fi
   
   # Observability
@@ -435,7 +460,7 @@ mkdir -p "$(dirname "$OUT")"
 ## Suggested Style Topics to Document
 - Dependency Injection: constructor-first; component boundaries and visibility.
 - Testing: JUnit 5 baseline; Mockito; integration testing with @SpringBootTest; Testcontainers; deterministic seeds.
-- Async: prefer Reactor vs CompletableFuture; cancellation; timeouts; schedulers; backpressure.
+- Async: prefer Reactor vs CompletableFuture; avoid .get()/.join() blocking; use composition (thenCompose/thenCombine); proper error handling; custom executors; CompletionStage in APIs.
 - HTTP: WebClient vs RestTemplate; connection pooling; retries with jitter; idempotency; timeouts.
 - Errors: exception taxonomy; problem+json; @ControllerAdvice mapping; avoid log-and-throw.
 - Validation: @Valid on boundaries; nullability annotations; DTO boundaries.
