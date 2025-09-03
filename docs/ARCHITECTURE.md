@@ -28,8 +28,8 @@ Project Rules (.cursor/rules/ + CLAUDE.md)
 
 **Global Rules** ([`ai/rules/`](../ai/rules/)):
 - `_global.md` - Core command policies and user rule management
-- `git_workflows.md` - Git operations, branching, and PR creation
-- `task_lists.md` - Task management and development practices
+- `git_workflows.md` - Git operations, branching, and PR creation standards
+- `task_lists.md` - Task management and development best practices
 
 **Project Rules**:
 - `.cursor/rules/` - IDE-specific rule files
@@ -49,12 +49,11 @@ The sync system uses a hierarchical approach:
 
 ```
 ai-clone (entry point)
-    ├── sync-agents.sh (orchestrates all syncing)
-    │   ├── sync-claude-prompts.sh (prompts)
-    │   ├── sync-claude-agents.sh (agents)
-    │   ├── sync-claude-commands.sh (rules)
-    │   └── sync-cursor-rules.sh (Cursor IDE rules)
-    └── sync-or-create-project-rules.sh (project setup)
+    └── sync-or-create-project-rules.sh (main project setup)
+        ├── sync-claude-prompts.sh (prompts)
+        ├── sync-claude-agents.sh (subagents)
+        ├── sync-claude-commands.sh (rules)
+        └── setup-cursor-rules.sh (Cursor IDE rules)
 ```
 
 #### Script Responsibilities
@@ -62,33 +61,44 @@ ai-clone (entry point)
 | Script | Purpose | Triggers |
 |--------|---------|----------|
 | [`ai-clone`](../bin/ai-clone) | Repository cloning + setup | Manual execution |
-| [`sync-agents.sh`](../scripts/sync-agents.sh) | Main sync orchestration | Called by ai-clone |
-| [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh) | Claude configuration update | Called by sync-agents |
-| [`sync-claude-prompts.sh`](../scripts/sync-claude-prompts.sh) | Prompt synchronization | Called by sync-agents |
-| [`sync-claude-agents.sh`](../scripts/sync-claude-agents.sh) | Agent synchronization | Called by sync-agents |
-| [`sync-cursor-rules.sh`](../scripts/sync-cursor-rules.sh) | Cursor IDE rule sync | Called by sync-agents |
-| [`sync-or-create-project-rules.sh`](../scripts/sync-or-create-project-rules.sh) | Project rule setup | Called by ai-clone |
+| [`sync-or-create-project-rules.sh`](../scripts/sync-or-create-project-rules.sh) | Main project setup and rule sync | Called by ai-clone |
+| [`sync-claude-commands.sh`](../scripts/sync-claude-commands.sh) | Claude Code rule compilation | Called by sync-or-create |
+| [`sync-claude-prompts.sh`](../scripts/sync-claude-prompts.sh) | Claude Code prompt synchronization | Called by sync-or-create |
+| [`sync-claude-agents.sh`](../scripts/sync-claude-agents.sh) | Claude Code subagent synchronization | Called by sync-or-create |
+| [`setup-cursor-rules.sh`](../scripts/setup-cursor-rules.sh) | Cursor IDE rule synchronization | Called by sync-or-create |
 
-### 3. Agent System Architecture
+### 3. Subagent System Architecture
 
-Agents are specialized AI configurations with defined:
+Subagents are specialized AI configurations with defined front-matter:
 
 ```yaml
 ---
-name: agent-name
-description: Agent purpose and capabilities
-tools: "Tool1, Tool2, Tool3"
-color: "color-code"
+name: subagent-name
+description: Subagent purpose and capabilities
+tools: Read, Write, Glob, Grep, Bash
+color: color-code
+arguments: [optional-args]
 ---
 ```
 
-#### Agent Categories
+#### Subagent Categories
 
-| Agent | Specialization | Tools | Use Case |
-|-------|---------------|-------|----------|
-| [docs-audit](../ai/agents/docs-audit.md) | Documentation analysis | Read, Write, Glob, Grep, LS, Bash | Repository documentation audits |
-| [general-explainer](../ai/agents/general-explainer.md) | Code explanation | Read, Grep, Glob, Write | General code analysis |
-| [code-reviewer](../ai/agents/code-reviewer.md) | Code review assistance | Read, Grep, Glob, Write | Code quality analysis |
+| Subagent | Specialization | Tools | Use Case |
+|----------|---------------|-------|----------|
+| [docs-audit](../ai/subagents/docs-audit.md) | Documentation audit specialist | Read, Write, Glob, Grep, LS, Bash | Repository documentation audits |
+| [general-explainer](../ai/subagents/general-explainer.md) | Code explanation and walkthroughs | Read, Grep, Glob, WebFetch, Write | General code analysis and explanation |
+| [code-reviewer](../ai/subagents/code-reviewer.md) | Ruthless pre-check code reviewer | Read, Grep, Glob, Bash, Write | Code quality and standards review |
+| [java-style-writer](../ai/subagents/java-style-writer.md) | Java code style analysis | Read, Grep, Glob, Bash, Write | Java-specific style guide generation |
+
+#### Prompt System
+
+| Prompt | Purpose | Integration |
+|--------|---------|-------------|
+| [task-manager](../ai/prompts/task-manager.md) | Project task list management | Creates `/task-lists/` markdown files |
+| [jira](../ai/prompts/jira.md) | Jira ticket management for Howcome | Uses `acli` CLI tool with OH project |
+| [branch](../ai/prompts/branch.md) | Git branch creation with Jira integration | Auto-fetches ticket details via `acli` |
+| [smart-precheck](../ai/prompts/smart-precheck.md) | Intelligent code review workflow | Integrates with precheck-reviewer subagent |
+| [java-style-compare](../ai/prompts/java-style-compare.md) | Java style analysis and comparison | Generates project-specific style guides |
 
 ## Data Flow
 
@@ -99,20 +109,18 @@ User runs: ai-clone git@host:user/repo.git
     ↓
 Clone repository to target directory
     ↓
-Run sync-agents.sh
+Run sync-or-create-project-rules.sh
     ├── Sync Claude prompts (sync-claude-prompts.sh)
-    ├── Sync Claude agents (sync-claude-agents.sh)
+    ├── Sync Claude subagents (sync-claude-agents.sh)
     ├── Sync global rules (sync-claude-commands.sh)
     │   ├── Compile rules into ~/.claude/CLAUDE.md
     │   └── Update Claude configuration
-    └── Sync Cursor rules (sync-cursor-rules.sh)
-    ↓
-Setup project rules (sync-or-create-project-rules.sh)
+    ├── Setup Cursor rules (setup-cursor-rules.sh)
     ├── Create .cursor/rules/ if needed
     ├── Symlink or create CLAUDE.md
-    └── Ensure consistency
+    └── Ensure project-specific consistency
     ↓
-Repository ready for development
+Repository ready for development with full AI integration
 ```
 
 ### 2. Rule Update Flow
@@ -120,27 +128,30 @@ Repository ready for development
 ```
 User modifies ~/dotfiles/ai/rules/*.md
     ↓
-Run sync-claude-commands.sh (manual or via sync-agents)
+Run sync-claude-commands.sh (manual or via sync-or-create-project-rules)
     ↓
 Rules compiled and distributed to:
-    ├── ~/.claude/CLAUDE.md (unified file)
-    ├── .cursor/rules/user-rules/*.mdc (individual files)
-    └── Git exclusion patterns updated
+    ├── ~/.claude/CLAUDE.md (unified file with combined rules)
+    ├── .cursor/rules/user-rules/*.mdc (individual files with front-matter)
+    └── Git exclusion patterns updated (.git/info/exclude)
 ```
 
-### 3. Agent Invocation Flow
+### 3. Subagent Invocation Flow
 
 ```
-User requests specialized task
+User requests specialized task (e.g., @agent-docs-audit)
     ↓
-Claude Code loads appropriate agent
+Claude Code loads appropriate subagent configuration
     ↓
-Agent configuration provides:
-    ├── Specialized prompt
-    ├── Tool restrictions
-    └── Behavioral guidelines
+Subagent configuration provides:
+    ├── Specialized system prompt
+    ├── Tool access restrictions
+    ├── Color coding for organization
+    └── Behavioral guidelines and workflows
     ↓
-Agent executes with constrained capabilities
+Subagent executes with defined capabilities and constraints
+    ↓
+Results delivered back to user with specialized expertise
 ```
 
 ## Integration Points

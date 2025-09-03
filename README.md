@@ -58,42 +58,88 @@ This automatically:
 - **Project Rules**: Repository-specific AI configuration
 - **Command Policies**: Allowed/forbidden commands for AI assistants
 
-### Agents
-- **docs-audit** ([`ai/agents/docs-audit.md`](ai/agents/docs-audit.md)): Documentation audit specialist
-- **general-explainer** ([`ai/agents/general-explainer.md`](ai/agents/general-explainer.md)): General purpose code explainer
+### AI Components
 
-### Sync Scripts
-- **sync-agents.sh** ([`ai/sync-agents.sh`](ai/sync-agents.sh)): Main orchestration script for all syncing
-- **sync-claude-commands.sh** ([`ai/sync-claude-commands.sh`](ai/sync-claude-commands.sh)): Updates Claude configuration
-- **sync-claude-prompts.sh** ([`ai/sync-claude-prompts.sh`](ai/sync-claude-prompts.sh)): Syncs prompts to Claude
-- **sync-claude-agents.sh** ([`ai/sync-claude-agents.sh`](ai/sync-claude-agents.sh)): Syncs agents to Claude
+#### Subagents ([`ai/subagents/`](ai/subagents/))
+| Agent | Purpose | Tools | Color |
+|-------|---------|-------|-------|
+| [docs-audit](ai/subagents/docs-audit.md) | Documentation audit specialist | Read, Write, Glob, Grep, LS, Bash | - |
+| [general-explainer](ai/subagents/general-explainer.md) | Code explanation and walkthroughs | Read, Grep, Glob, WebFetch, Write | - |
+| [code-reviewer](ai/subagents/code-reviewer.md) | Ruthless pre-check code reviewer | Read, Grep, Glob, Bash, Write | Yellow |
+| [java-style-writer](ai/subagents/java-style-writer.md) | Java code style analysis | Read, Grep, Glob, Bash, Write | - |
+
+#### Prompts ([`ai/prompts/`](ai/prompts/))
+| Prompt | Purpose | Integration |
+|--------|---------|-------------|
+| [task-manager](ai/prompts/task-manager.md) | Project task list management | Creates `/task-lists/` markdown files |
+| [jira](ai/prompts/jira.md) | Jira ticket management for Howcome | Uses `acli` CLI tool |
+| [branch](ai/prompts/branch.md) | Git branch creation with Jira integration | Auto-fetches ticket details |
+| [jira-ticket-creator](ai/prompts/jira-ticket-creator.md) | Automated Jira ticket creation | OH project integration |
+| [smart-precheck](ai/prompts/smart-precheck.md) | Intelligent code review workflow | Integrates with precheck-reviewer |
+| [java-style-compare](ai/prompts/java-style-compare.md) | Java style analysis and comparison | Generates style guides |
+| [git-commit-push](ai/prompts/git-commit-push.md) | Git commit and push automation | Branch workflow integration |
+
+#### Rules ([`ai/rules/`](ai/rules/))
+| Rule | Purpose | Scope |
+|------|---------|-------|
+| [_global](ai/rules/_global.md) | Core command execution policies | All projects |
+| [git_workflows](ai/rules/git_workflows.md) | Git branch, commit, and PR standards | All projects |
+| [task_lists](ai/rules/task_lists.md) | Task management guidelines | All projects |
+
+### Sync Scripts ([`scripts/`](scripts/))
+- **sync-or-create-project-rules.sh**: Main project setup and rule synchronization
+- **sync-claude-commands.sh**: Updates Claude Code configuration
+- **sync-claude-prompts.sh**: Syncs prompts to Claude Code
+- **sync-claude-agents.sh**: Syncs subagents to Claude Code
+- **setup-cursor-rules.sh**: Cursor IDE rule synchronization
+- **setup-dotfiles.sh**: Initial dotfiles setup
+- **setup-gitignore.sh**: Global gitignore configuration
+
+### Utilities ([`bin/`](bin/))
+- **ai-clone**: Intelligent repository cloning with automatic AI setup
+- **pr-list**: GitHub pull request listing and management
 
 ## File Structure
 
 ```
 ~/dotfiles/
 ├── ai/                              # AI tooling and configuration
-│   ├── agents/                      # Specialized AI agents
-│   │   ├── docs-audit.md           # Documentation specialist
-│   │   ├── general-explainer.md    # Code explainer
-│   │   └── code-reviewer.md        # Code review assistant
-│   ├── prompts/                     # Reusable prompts
-│   │   └── task-manager.md         # Task management prompt
+│   ├── subagents/                   # Specialized AI subagents
+│   │   ├── docs-audit.md           # Documentation audit specialist
+│   │   ├── general-explainer.md    # Code explanation and walkthroughs
+│   │   ├── code-reviewer.md        # Ruthless pre-check code reviewer
+│   │   └── java-style-writer.md    # Java code style analysis
+│   ├── prompts/                     # Reusable AI prompts
+│   │   ├── task-manager.md         # Project task list management
+│   │   ├── jira.md                 # Jira ticket management for Howcome
+│   │   ├── branch.md               # Git branch creation with Jira integration
+│   │   ├── jira-ticket-creator.md  # Automated Jira ticket creation
+│   │   ├── smart-precheck.md       # Intelligent code review workflow
+│   │   ├── java-style-compare.md   # Java style analysis and comparison
+│   │   └── git-commit-push.md      # Git commit and push automation
 │   ├── rules/                       # Global AI rules
-│   │   ├── _global.md              # Core command policies
-│   │   ├── git_workflows.md        # Git workflow rules
-│   │   └── task_lists.md           # Task management rules
-│   ├── ai-clone*                    # Main cloning script
-│   ├── sync-agents.sh*             # Main sync orchestration
-│   ├── sync-claude-commands.sh*    # Claude command sync
-│   ├── sync-claude-prompts.sh*     # Prompt sync
-│   ├── sync-claude-agents.sh*      # Agent sync
-│   └── sync-or-create-project-rules.sh*  # Project rule setup
-├── .claude/                         # Claude Code configuration
-│   └── settings.local.json         # Claude permissions
-└── .cursor/                         # Cursor IDE configuration
-    └── rules/
-        └── user-rules/              # Symlinked user rules
+│   │   ├── _global.md              # Core command execution policies
+│   │   ├── git_workflows.md        # Git branch, commit, and PR standards
+│   │   └── task_lists.md           # Task management guidelines
+│   ├── config/                      # AI configuration files
+│   │   └── personal-global.mdc     # Personal global configuration
+│   └── sync-or-create-project-rules.sh@ # Symlink to main sync script
+├── scripts/                         # Shell scripts for automation
+│   ├── sync-or-create-project-rules.sh # Main project setup and rule sync
+│   ├── sync-claude-commands.sh     # Updates Claude Code configuration
+│   ├── sync-claude-prompts.sh      # Syncs prompts to Claude Code
+│   ├── sync-claude-agents.sh       # Syncs subagents to Claude Code
+│   ├── setup-cursor-rules.sh       # Cursor IDE rule synchronization
+│   ├── setup-dotfiles.sh           # Initial dotfiles setup
+│   └── setup-gitignore.sh          # Global gitignore configuration
+├── bin/                             # Executable utilities
+│   ├── ai-clone*                   # Intelligent repository cloning
+│   └── pr-list*                    # GitHub pull request management
+└── docs/                            # Documentation
+    ├── ARCHITECTURE.md             # System design and components
+    ├── DEVELOPMENT.md              # Setup, testing, and contribution
+    ├── AI_RULES.md                 # Complete rule documentation
+    └── AGENTS.md                   # Available agents and capabilities
 ```
 
 ## Key Features
