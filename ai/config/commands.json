@@ -1,0 +1,457 @@
+{
+  "always_allowed": [
+    {
+      "command": "pnpm install",
+      "description": "Install package dependencies using pnpm",
+      "category": "package_management",
+      "examples": [
+        "pnpm install",
+        "pnpm install --frozen-lockfile"
+      ]
+    },
+    {
+      "command": "pnpm list",
+      "description": "List installed packages",
+      "category": "package_management",
+      "examples": [
+        "pnpm list",
+        "pnpm list --depth=0"
+      ]
+    },
+    {
+      "command": "npm list",
+      "description": "List installed npm packages",
+      "category": "package_management",
+      "examples": [
+        "npm list",
+        "npm list -g"
+      ]
+    },
+    {
+      "command": "yarn install",
+      "description": "Install dependencies using Yarn",
+      "category": "package_management",
+      "examples": [
+        "yarn install",
+        "yarn install --frozen-lockfile"
+      ]
+    },
+    {
+      "command": "yarn test",
+      "description": "Run tests using Yarn",
+      "category": "package_management",
+      "examples": [
+        "yarn test",
+        "yarn test --coverage"
+      ]
+    },
+    {
+      "command": "yarn build",
+      "description": "Build project using Yarn",
+      "category": "package_management",
+      "examples": [
+        "yarn build",
+        "yarn build --production"
+      ]
+    },
+    {
+      "command": "yarn lint",
+      "description": "Run linting using Yarn",
+      "category": "package_management",
+      "examples": [
+        "yarn lint",
+        "yarn lint --fix"
+      ]
+    },
+    {
+      "command": "yarn eslint",
+      "description": "Run ESLint using Yarn",
+      "category": "package_management",
+      "examples": [
+        "yarn eslint src/",
+        "yarn eslint --fix"
+      ]
+    },
+    {
+      "command": "ls",
+      "description": "List directory contents",
+      "category": "file_operations",
+      "examples": [
+        "ls",
+        "ls -la",
+        "ls -lh"
+      ]
+    },
+    {
+      "command": "pwd",
+      "description": "Print working directory",
+      "category": "file_operations",
+      "examples": [
+        "pwd"
+      ]
+    },
+    {
+      "command": "cat",
+      "description": "Display file contents",
+      "category": "file_operations",
+      "examples": [
+        "cat file.txt",
+        "cat package.json"
+      ]
+    },
+    {
+      "command": "grep",
+      "description": "Search text patterns in files",
+      "category": "text_processing",
+      "examples": [
+        "grep 'pattern' file.txt",
+        "grep -r 'pattern' src/"
+      ]
+    },
+    {
+      "command": "git status",
+      "description": "Show working tree status",
+      "category": "git",
+      "examples": [
+        "git status",
+        "git status --short"
+      ]
+    },
+    {
+      "command": "git log",
+      "description": "Show commit history",
+      "category": "git",
+      "examples": [
+        "git log",
+        "git log --oneline",
+        "git log -5"
+      ]
+    },
+    {
+      "command": "git diff",
+      "description": "Show changes between commits, commit and working tree, etc",
+      "category": "git",
+      "examples": [
+        "git diff",
+        "git diff HEAD~1",
+        "git diff --staged"
+      ]
+    },
+    {
+      "command": "git fetch",
+      "description": "Download objects and refs from remote repository",
+      "category": "git",
+      "examples": [
+        "git fetch",
+        "git fetch origin",
+        "git fetch --all"
+      ]
+    },
+    {
+      "command": "git branch",
+      "description": "List, create, or delete branches",
+      "category": "git",
+      "examples": [
+        "git branch",
+        "git branch -a",
+        "git branch new-feature"
+      ]
+    },
+    {
+      "command": "git show",
+      "description": "Show various types of objects",
+      "category": "git",
+      "examples": [
+        "git show",
+        "git show HEAD",
+        "git show v1.0"
+      ]
+    },
+    {
+      "command": "git checkout",
+      "description": "Switch branches or restore working tree files",
+      "category": "git",
+      "examples": [
+        "git checkout main",
+        "git checkout -b feature",
+        "git checkout file.txt"
+      ]
+    },
+    {
+      "command": "git pull origin master",
+      "description": "Pull changes from origin master branch",
+      "category": "git",
+      "examples": [
+        "git pull origin master",
+        "git pull origin main"
+      ]
+    },
+    {
+      "command": "pnpm audit",
+      "description": "Run security audit on dependencies",
+      "category": "package_management",
+      "examples": [
+        "pnpm audit",
+        "pnpm audit --fix"
+      ]
+    },
+    {
+      "command": "pnpm test",
+      "description": "Run tests using pnpm",
+      "category": "package_management",
+      "examples": [
+        "pnpm test",
+        "pnpm test --coverage"
+      ]
+    },
+    {
+      "command": "pnpm test:ci",
+      "description": "Run tests in CI mode",
+      "category": "package_management",
+      "examples": [
+        "pnpm test:ci"
+      ]
+    },
+    {
+      "command": "pnpm build",
+      "description": "Build project using pnpm",
+      "category": "package_management",
+      "examples": [
+        "pnpm build",
+        "pnpm build --mode production"
+      ]
+    },
+    {
+      "command": "WebFetch",
+      "description": "Fetch content from web URLs",
+      "category": "web",
+      "examples": [
+        "WebFetch https://example.com"
+      ]
+    },
+    {
+      "command": "head",
+      "description": "Display first lines of a file",
+      "category": "text_processing",
+      "examples": [
+        "head file.txt",
+        "head -n 20 file.txt"
+      ]
+    },
+    {
+      "command": "tail",
+      "description": "Display last lines of a file",
+      "category": "text_processing",
+      "examples": [
+        "tail file.txt",
+        "tail -f log.txt",
+        "tail -n 50 file.txt"
+      ]
+    },
+    {
+      "command": "less",
+      "description": "View file contents page by page",
+      "category": "text_processing",
+      "examples": [
+        "less file.txt",
+        "less +G file.txt"
+      ]
+    },
+    {
+      "command": "more",
+      "description": "View file contents page by page",
+      "category": "text_processing",
+      "examples": [
+        "more file.txt"
+      ]
+    },
+    {
+      "command": "file",
+      "description": "Determine file type",
+      "category": "file_operations",
+      "examples": [
+        "file document.pdf",
+        "file *"
+      ]
+    },
+    {
+      "command": "wc",
+      "description": "Count lines, words, and characters",
+      "category": "text_processing",
+      "examples": [
+        "wc file.txt",
+        "wc -l file.txt",
+        "wc -w file.txt"
+      ]
+    },
+    {
+      "command": "sort",
+      "description": "Sort lines of text",
+      "category": "text_processing",
+      "examples": [
+        "sort file.txt",
+        "sort -n numbers.txt",
+        "sort -r file.txt"
+      ]
+    },
+    {
+      "command": "uniq",
+      "description": "Report or omit repeated lines",
+      "category": "text_processing",
+      "examples": [
+        "uniq file.txt",
+        "sort file.txt | uniq",
+        "uniq -c file.txt"
+      ]
+    },
+    {
+      "command": "awk",
+      "description": "Pattern scanning and processing language",
+      "category": "text_processing",
+      "examples": [
+        "awk '{print $1}' file.txt",
+        "awk -F',' '{print $2}' data.csv"
+      ]
+    },
+    {
+      "command": "sed",
+      "description": "Stream editor for filtering and transforming text",
+      "category": "text_processing",
+      "examples": [
+        "sed 's/old/new/' file.txt",
+        "sed -n '1,10p' file.txt"
+      ]
+    },
+    {
+      "command": "cut",
+      "description": "Extract sections from each line of files",
+      "category": "text_processing",
+      "examples": [
+        "cut -d',' -f1 data.csv",
+        "cut -c1-10 file.txt"
+      ]
+    },
+    {
+      "command": "tr",
+      "description": "Translate or delete characters",
+      "category": "text_processing",
+      "examples": [
+        "tr 'a-z' 'A-Z'",
+        "tr -d ' '"
+      ]
+    },
+    {
+      "command": "ps",
+      "description": "Display running processes",
+      "category": "system_info",
+      "examples": [
+        "ps aux",
+        "ps -ef",
+        "ps -u username"
+      ]
+    },
+    {
+      "command": "top",
+      "description": "Display and update sorted information about running processes",
+      "category": "system_info",
+      "examples": [
+        "top",
+        "top -u username"
+      ]
+    },
+    {
+      "command": "env",
+      "description": "Display environment variables",
+      "category": "system_info",
+      "examples": [
+        "env",
+        "env | grep PATH"
+      ]
+    },
+    {
+      "command": "printenv",
+      "description": "Print environment variables",
+      "category": "system_info",
+      "examples": [
+        "printenv",
+        "printenv PATH",
+        "printenv HOME"
+      ]
+    },
+    {
+      "command": "whoami",
+      "description": "Display current username",
+      "category": "system_info",
+      "examples": [
+        "whoami"
+      ]
+    },
+    {
+      "command": "id",
+      "description": "Display user and group IDs",
+      "category": "system_info",
+      "examples": [
+        "id",
+        "id username",
+        "id -g"
+      ]
+    },
+    {
+      "command": "echo",
+      "description": "Display text",
+      "category": "system_info",
+      "examples": [
+        "echo 'Hello World'",
+        "echo $PATH",
+        "echo -n 'no newline'"
+      ]
+    },
+    {
+      "command": "mkdir -p tmp",
+      "description": "Create tmp directory (with parent directories as needed)",
+      "category": "file_operations",
+      "examples": [
+        "mkdir -p tmp",
+        "mkdir -p path/to/directory"
+      ]
+    },
+    {
+      "command": "acli jira workitem",
+      "description": "Access Jira work items via acli tool",
+      "category": "tools",
+      "examples": [
+        "acli jira workitem list",
+        "acli jira workitem show TICKET-123"
+      ]
+    }
+  ],
+  "needs_confirmation": [
+    {
+      "command": "rm",
+      "description": "Remove files and directories",
+      "risk_level": "high",
+      "confirmation_message": "This command will permanently delete files. Are you sure you want to proceed?",
+      "category": "file_operations"
+    },
+    {
+      "command": "rm -rf",
+      "description": "Recursively and forcefully remove files and directories",
+      "risk_level": "high",
+      "confirmation_message": "This command will permanently delete files and directories recursively. This cannot be undone. Are you sure?",
+      "category": "file_operations"
+    },
+    {
+      "command": "rimraf",
+      "description": "Cross-platform rm -rf utility",
+      "risk_level": "high",
+      "confirmation_message": "This command will permanently delete files and directories. Are you sure you want to proceed?",
+      "category": "file_operations"
+    }
+  ],
+  "forbidden": [],
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2025-09-03",
+    "updated_by": "AI Assistant"
+  }
+}

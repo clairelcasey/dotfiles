@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Allowed Commands Configuration",
+  "description": "Configuration for commands that AI assistants are allowed to execute",
+  "type": "object",
+  "properties": {
+    "always_allowed": {
+      "description": "Commands that can be executed without confirmation",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command pattern or exact command"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what the command does"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["package_management", "file_operations", "git", "system_info", "text_processing", "web", "tools"],
+            "description": "Category this command belongs to"
+          },
+          "examples": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Example usage of the command"
+          }
+        },
+        "required": ["command", "description", "category"],
+        "additionalProperties": false
+      }
+    },
+    "needs_confirmation": {
+      "description": "Commands that require explicit user confirmation before execution",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command pattern or exact command"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of what the command does"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "description": "Risk level of executing this command"
+          },
+          "confirmation_message": {
+            "type": "string",
+            "description": "Message to show when requesting confirmation"
+          },
+          "category": {
+            "type": "string",
+            "enum": ["file_operations", "system", "network", "database"],
+            "description": "Category this command belongs to"
+          }
+        },
+        "required": ["command", "description", "risk_level", "confirmation_message", "category"],
+        "additionalProperties": false
+      }
+    },
+    "forbidden": {
+      "description": "Commands that are explicitly forbidden",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command pattern or exact command"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason why this command is forbidden"
+          }
+        },
+        "required": ["command", "reason"],
+        "additionalProperties": false
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "version": {"type": "string"},
+        "last_updated": {"type": "string"},
+        "updated_by": {"type": "string"}
+      }
+    }
+  },
+  "required": ["always_allowed", "needs_confirmation", "forbidden"],
+  "additionalProperties": false
+}
