@@ -1,7 +1,18 @@
 ---
-description: Comprehensive Java style analysis workflow: scanner + AI analysis + comparison + examples, with timestamped output for backend developers.
+description: Comprehensive Java style analysis workflow - scanner + AI analysis + comparison + examples, with timestamped output for backend developers.
 argument-hint: [repo-path]
-allowed-tools: Bash(bash:*), Bash(cat:*), Bash(jq:*), Bash(date:*), Bash(git status:*), Bash(git rev-parse:*), Bash(echo:*), Bash(grep:*), Bash(basename:*), Bash(mkdir:*), Write(./tmp/java-style-*)
+allowed-tools:
+  - "Bash(bash:*)"
+  - "Bash(cat:*)"
+  - "Bash(jq:*)"
+  - "Bash(date:*)"
+  - "Bash(git status:*)"
+  - "Bash(git rev-parse:*)"
+  - "Bash(echo:*)"
+  - "Bash(grep:*)"
+  - "Bash(basename:*)"
+  - "Bash(mkdir:*)"
+  - "Write(./tmp/java-style-*)"
 # Optionally pin a model:
 # model: claude-3-5-sonnet-latest
 ---
