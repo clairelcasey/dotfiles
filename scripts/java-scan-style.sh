@@ -161,6 +161,8 @@ declare -a ANTI_PATTERNS=(
   "new\\s+.*Connection\\s*\\("       ":: Avoid manual connection management; use connection pools."
   "executeQuery\\s*\\(.*\\+.*\\)"    ":: SQL concatenation detected; use parameterized queries."
   "Statement\\s+.*=.*createStatement" ":: Use PreparedStatement instead of Statement for better security."
+  "@SuppressWarnings\\s*\\("          ":: @SuppressWarnings without justification comment; add explanation."
+  "catch\\s*\\(\\s*Exception\\s+\\w+\\)" ":: Overly broad exception handling; catch specific exception types."
 )
 
 # Helper: run search respecting file extensions
