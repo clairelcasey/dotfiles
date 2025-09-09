@@ -133,6 +133,6 @@ End with an actionable checklist covering:
 - **Use Visuals**: Include tables and Mermaid diagrams for complex concepts
 - **Developer Focus**: Optimize for backend developer onboarding and daily reference
 - **Include Spotify Context**: Reference Apollo, Dagger, and internal libraries as appropriate
-- **Output File**: Save your style guide to `./tmp/java-style-ai-{timestamp}.md`
-- Generate a timestamp using `date +%Y%m%d_%H%M%S` for the filename
+- **Output File**: Save your style guide to `./tmp/{YYYYMMDD_HHMMSS}_java-style-ai.md`
+- Generate a timestamp in format YYYYMMDD_HHMMSS (e.g., 20250109_143052) for the filename
 - If uncertain about a pattern, state your recommendation and mark it as [TODO: Verify with team]

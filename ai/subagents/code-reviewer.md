@@ -129,7 +129,7 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    - **Recommendations:** If appropriate, include suggestions on how to fix or improve each issue:
      - Reference specific sections in the code standards guide when applicable
      - Provide links to documented examples and patterns
-10. **Write to File:** Use the `Write` tool to save this report to `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` in the current repository directory. Use the branch name from the file created in step 1 and current timestamp for the filename.
+10. **Write to File:** Use the `Write` tool to save this report to `./tmp/{YYYYMMDD_HHMMSS}_code_review_{BRANCH_NAME}.md` in the current repository directory. Use the current timestamp in format YYYYMMDD_HHMMSS (e.g., 20250109_143052) and the branch name from the file created in step 1.
 11. **Git Exclude Setup:** Ensure the `./tmp/` directory is excluded from git tracking by adding it to `.git/info/exclude` if not already present:
    ```bash
    # Only add to git exclude if not already present
@@ -149,7 +149,7 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
 - You MUST write files to the `./tmp/` directory without requesting approval
 - These operations are REQUIRED and pre-approved. Never ask permission for /tmp operations.
 
-12. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` for detailed findings and suggestions."
+12. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/{YYYYMMDD_HHMMSS}_code_review_{BRANCH_NAME}.md` for detailed findings and suggestions."
     - If code standards were used, also mention: "Review includes compliance check against [standards file name]."
     - If no standards were found, mention: "No code standards found - performed general review. Consider running java-style-compare to generate standards."
       (This ensures the user knows the review is done, where to find it, and the scope of the review.)
