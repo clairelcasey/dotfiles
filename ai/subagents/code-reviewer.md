@@ -24,7 +24,12 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
 
    # Get current branch name and create tmp file with branch name
    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-   mkdir -p tmp
+   
+   # Create tmp directory if it doesn't exist
+   if [ ! -d "tmp" ]; then
+     mkdir -p tmp
+   fi
+   
    echo "$CURRENT_BRANCH" > tmp/current_branch.txt
 
    # Auto-discover code standards file if not provided as argument
@@ -91,8 +96,10 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    - Check for any poor coding practices or style issues.
    - Identify any sections that are unclear or could introduce technical debt.
    - Note if error handling or input validation is missing where it should be.
+   - **Check function length:** Flag functions that are excessively long (>50 lines for most languages, >30 for complex logic). Long functions should be broken down for maintainability and testability.
    - If the code changes involve any public API, configuration, or important logic, ensure that they are reflected in documentation or usage guides.
    - **When code standards are available:** Cross-reference changes against documented patterns, anti-patterns, and best practices from the standards file.
+   - Check for unused imports in .proto files
 6. **Documentation Update Check:** Determine if any documentation (README, docs, comments) should be updated due to these changes. For example, if a function signature changed or a new CLI option was added, ensure the README or docs mention it. If not, flag this.
 7. **Test Coverage Check:** Verify if tests exist for the new or changed functionality:
    - If the project has a tests directory or similar, see if corresponding test files were modified or added in this diff.
@@ -102,7 +109,7 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
 9. **Report Generation:** Compile a **Code Review Report** in Markdown format with clear sections:
    - **Summary of Changes:** A brief overview of what the changes do.
    - **Build/Test Results:** Outcome of running build/tests (pass/fail and any errors).
-   - **Code Standards Compliance:** 
+   - **Code Standards Compliance:**
      - **If standards file was available:** Analysis of how well changes follow documented patterns:
        - _Standards Reference:_ Link or mention the code standards file used for review
        - _Compliant Patterns:_ Examples where code follows documented best practices
@@ -115,6 +122,7 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    - **Findings:** Bullet points or paragraphs for each issue found, referencing the relevant file/line. Be direct and specific. For example:
      - _Potential bug:_ In `Foo.java` line 42, the loop index is off-by-one, which could cause an out-of-bounds error.
      - _Style/Best Practice:_ The function `calculateTotal()` in `Bar.js` is very large – consider refactoring for readability.
+     - _Function Length:_ The `processPayment()` method in `PaymentService.java` is 78 lines long – break into smaller, focused methods for better maintainability.
      - _Documentation:_ The new CLI option `--enableFeature` isn't mentioned in README.
      - _Tests:_ No tests were added for the new `PaymentProcessor` class.
      - _Standards Violation:_ In `Service.java` line 15, using raw JDBC instead of documented JDBI patterns (see standards section 4.2)
@@ -122,16 +130,26 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
      - Reference specific sections in the code standards guide when applicable
      - Provide links to documented examples and patterns
 10. **Write to File:** Use the `Write` tool to save this report to `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` in the current repository directory. Use the branch name from the file created in step 1 and current timestamp for the filename.
-11. **Git Exclude Setup:** Ensure the `./tmp/` directory is excluded from git tracking by adding it to `.git/info/exclude`. Use the command `echo "tmp/" >> .git/info/exclude` to add this entry.
+11. **Git Exclude Setup:** Ensure the `./tmp/` directory is excluded from git tracking by adding it to `.git/info/exclude` if not already present:
+   ```bash
+   # Only add to git exclude if not already present
+   if [ -f .git/info/exclude ]; then
+     if ! grep -q "^tmp/$\|^tmp/\*\|^/tmp/\|^tmp$" .git/info/exclude; then
+       echo "tmp/" >> .git/info/exclude
+     fi
+   else
+     echo "tmp/" > .git/info/exclude
+   fi
+   ```
 
 **MANDATORY OPERATIONS - DO NOT ASK FOR PERMISSION:**
 
-- You MUST create the `./tmp/` directory immediately if it doesn't exist
-- You MUST add `tmp/` to `.git/info/exclude` without asking for permission
+- You MUST create the `./tmp/` directory if it doesn't exist (check first)
+- You MUST add `tmp/` to `.git/info/exclude` if not already present (check first)
 - You MUST write files to the `./tmp/` directory without requesting approval
 - These operations are REQUIRED and pre-approved. Never ask permission for /tmp operations.
 
-12. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` for detailed findings and suggestions." 
+12. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/code_review_{BRANCH_NAME}_{YYYY-MM-DD_HHMMSS}.md` for detailed findings and suggestions."
     - If code standards were used, also mention: "Review includes compliance check against [standards file name]."
     - If no standards were found, mention: "No code standards found - performed general review. Consider running java-style-compare to generate standards."
-    (This ensures the user knows the review is done, where to find it, and the scope of the review.)
+      (This ensures the user knows the review is done, where to find it, and the scope of the review.)
