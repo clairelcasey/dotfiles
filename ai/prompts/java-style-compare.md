@@ -7,8 +7,7 @@ allowed-tools:
   - "Bash(jq:*)"
   - "Bash(date:*)"
   - "Bash(git status:*)"
-  - "Bash(git rev-parse --abbrev-ref HEAD || true:*)"
-  - "Bash(git status -s || true:*)"
+  - "Bash(git rev-parse:*)"
   - "Bash(echo:*)"
   - "Bash(grep:*)"
   - "Bash(basename:*)"
@@ -18,15 +17,19 @@ allowed-tools:
 # model: claude-3-5-sonnet-latest
 ---
 
-## Context (auto-collected)
+## Context
 
 - Repo root (if provided): $1
-- Current branch: !`git rev-parse --abbrev-ref HEAD || true`
-- Git status (short): !`git status -s || true`
 
 ## Step 0 — Setup & Repository Confirmation
 
 ```bash
+# Get current git context
+echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+echo "Git status:"
+git status -s
+echo ""
+
 # Setup tmp directory and git exclusion
 mkdir -p ./tmp
 if [ -f .git/info/exclude ]; then
