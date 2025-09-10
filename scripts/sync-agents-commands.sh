@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # --------------------------------------------------------------
-# sync-claude-commands.sh
+# sync-agents-commands.sh
 #
 # Usage:
-#   ~/dotfiles/scripts/sync-claude-commands.sh
+#   ~/dotfiles/scripts/sync-agents-commands.sh
 #
-# - Combines all markdown files from global/ directory
-# - Creates a unified ~/.claude/CLAUDE.md file with all rules
+# - Combines all markdown files from rules/ directory
+# - Creates a unified ~/.claude/AGENTS.md file with all rules
+# - Creates symlink from CLAUDE.md to AGENTS.md for backward compatibility
 # --------------------------------------------------------------
 
 set -euo pipefail
@@ -14,6 +15,7 @@ set -euo pipefail
 AI_RULE_DIR="$HOME/dotfiles/ai"
 RULES_DIR="$AI_RULE_DIR/rules"
 CLAUDE_DIR="$HOME/.claude"
+AGENTS_FILE="$CLAUDE_DIR/AGENTS.md"
 CLAUDE_FILE="$CLAUDE_DIR/CLAUDE.md"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
@@ -24,8 +26,8 @@ fi
 
 mkdir -p "$CLAUDE_DIR"
 
-# Build combined CLAUDE.md file
-build_claude_md() {
+# Build combined AGENTS.md file
+build_agents_md() {
   echo "# AI Assistant Rules"
   echo ""
   echo "This file contains all AI assistant rules and preferences combined from the rules configuration."
@@ -175,15 +177,22 @@ EOF
   echo "$new_settings" > "$SETTINGS_FILE"
 }
 
-# Create the unified CLAUDE.md file
-build_claude_md > "$CLAUDE_FILE"
+# Create the unified AGENTS.md file
+build_agents_md > "$AGENTS_FILE"
 
-echo "✔︎ Created unified Claude rules file at $CLAUDE_FILE"
+echo "✔︎ Created unified agents rules file at $AGENTS_FILE"
+
+# Create symlink from CLAUDE.md to AGENTS.md for backward compatibility
+if [ -L "$CLAUDE_FILE" ] || [ -f "$CLAUDE_FILE" ]; then
+  rm "$CLAUDE_FILE"
+fi
+ln -s "$(basename "$AGENTS_FILE")" "$CLAUDE_FILE"
+echo "✔︎ Created symlink from CLAUDE.md to AGENTS.md"
 
 # Update settings.json with command permissions
 update_settings_json
 
-echo "✔︎ Updated Claude settings file at $SETTINGS_FILE"
+echo "✔︎ Updated agent settings file at $SETTINGS_FILE"
 
 # Show summary
 echo ""
@@ -195,7 +204,7 @@ find "$RULES_DIR" -name "*.md" -type f | while read -r md_file; do
 done
 
 echo ""
-echo "✅ Claude rules and settings unified and updated."
+echo "✅ Agent rules and settings unified and updated."
 
 # Sync Claude prompts
 echo ""

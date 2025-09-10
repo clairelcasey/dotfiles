@@ -8,8 +8,8 @@
 # Orchestrates syncing of all AI development components:
 # - Claude prompts
 # - Claude agents  
-# - Claude commands/rules
-# - Cursor rules (when in git repository)
+# - Agent commands/rules (creates unified AGENTS.md)
+# - Cursor rules (copies AGENTS.md to .cursor/rules/, when in git repository)
 # --------------------------------------------------------------
 
 set -euo pipefail
@@ -44,17 +44,17 @@ else
     echo "⚠️  Warning: $CLAUDE_AGENTS_SCRIPT not found"
 fi
 
-# 3. Sync Claude commands/rules
+# 3. Sync agent commands/rules (creates AGENTS.md)
 echo ""
-echo "⚙️  Syncing Claude commands..."
-CLAUDE_COMMANDS_SCRIPT="$AI_DIR/sync-claude-commands.sh"
-if [ -f "$CLAUDE_COMMANDS_SCRIPT" ]; then
-    "$CLAUDE_COMMANDS_SCRIPT"
+echo "⚙️  Syncing agent commands..."
+AGENTS_COMMANDS_SCRIPT="$AI_DIR/sync-agents-commands.sh"
+if [ -f "$AGENTS_COMMANDS_SCRIPT" ]; then
+    "$AGENTS_COMMANDS_SCRIPT"
 else
-    echo "⚠️  Warning: $CLAUDE_COMMANDS_SCRIPT not found"
+    echo "⚠️  Warning: $AGENTS_COMMANDS_SCRIPT not found"
 fi
 
-# 4. Sync Cursor rules (only if in a git repo)
+# 4. Sync Cursor rules (copies AGENTS.md to .cursor/rules/, only if in a git repo)
 echo ""
 echo "📝 Syncing Cursor rules..."
 CURSOR_RULES_SCRIPT="$AI_DIR/sync-cursor-rules.sh"

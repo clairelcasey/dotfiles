@@ -5,24 +5,21 @@
 # Usage (inside a Git repo):
 #   ~/dotfiles/scripts/sync-cursor-rules.sh
 #
-# - Creates or updates ~/dotfiles/ai/config/personal-global.mdc
-#   by concatenating **all** markdown rule files found in
-#   ~/dotfiles/ai/rules/ (alphabetical order).
-# - Symlinks that file into .cursor/rules/user-rules/ in
-#   the current repository, overwriting any previous symlink.
-# - Adds '.cursor/rules/user-rules/' to .git/info/exclude.
+# - Copies the unified ~/.claude/AGENTS.md file to .cursor/rules/AGENTS.md
+#   in the current repository.
+# - Adds '.cursor/rules/' to .git/info/exclude.
 # --------------------------------------------------------------
 
 set -euo pipefail
 
-AI_RULE_DIR="$HOME/dotfiles/ai"
-RULES_DIR="$AI_RULE_DIR/rules"
-COMBINED="$AI_RULE_DIR/config/personal-global.mdc"
-DEST_SUBDIR=".cursor/rules/user-rules"
-DEST_FILE="personal-global.mdc"
+CLAUDE_DIR="$HOME/.claude"
+AGENTS_FILE="$CLAUDE_DIR/AGENTS.md"
+DEST_SUBDIR=".cursor/rules"
+DEST_FILE="AGENTS.md"
 
-if [ ! -d "$RULES_DIR" ]; then
-  echo "Error: expected rule directory $RULES_DIR not found" >&2
+if [ ! -f "$AGENTS_FILE" ]; then
+  echo "Error: AGENTS.md not found at $AGENTS_FILE" >&2
+  echo "Run sync-agents-commands.sh first to create the AGENTS.md file" >&2
   exit 1
 fi
 
@@ -32,48 +29,13 @@ if ! git_root=$(git rev-parse --show-toplevel 2>/dev/null); then
   exit 1
 fi
 
-# 1. Build/overwrite the combined MDC file
-{
-  echo "---"
-  echo "description: Personal global dev guidelines"
-  echo "globs:"
-  echo "alwaysApply: true"
-  echo "---"
-  echo
-  for src in $(ls -1 "$RULES_DIR"/*.md 2>/dev/null | sort); do
-    rule="$(basename "$src")"
-    printf "## %s\n\n" "${rule%.md}"
-    cat "$src"
-    echo -e "\n\n"
-  done
-} > "$COMBINED"
-echo "✔︎ Built $COMBINED"
-
-# 2. Symlink **each** rule file into the current repo (better granularity for Cursor)
+# 1. Copy AGENTS.md to destination
 dest_dir="$git_root/$DEST_SUBDIR"
 mkdir -p "$dest_dir"
+cp "$AGENTS_FILE" "$dest_dir/$DEST_FILE"
+echo "✔︎ Copied $AGENTS_FILE to $dest_dir/$DEST_FILE"
 
-# Clean out previous rule files (.md/.mdc) in dest_dir to avoid stale copies
-find "$dest_dir" -maxdepth 1 -type f \( -name "*.md" -o -name "*.mdc" \) -exec rm {} + || true
-
-# Create an .mdc file for each rule with always-apply front-matter
-for src in $(ls -1 "$RULES_DIR"/*.md 2>/dev/null | sort); do
-  rule_basename="$(basename "$src" .md)"
-  dest_mdc="$dest_dir/${rule_basename}.mdc"
-  {
-    echo "---"
-    echo "description: ${rule_basename//_/ }"
-    echo "globs:"
-    echo "alwaysApply: true"
-    echo "---"
-    echo
-    cat "$src"
-  } > "$dest_mdc"
-done
-
-echo "✔︎ Generated individual .mdc rule files into $dest_dir"
-
-# 3. Ensure folders are ignored by Git
+# 2. Ensure cursor rules directory is ignored by Git
 exclude_file="$git_root/.git/info/exclude"
 
 # Exclude cursor rules directory
@@ -90,4 +52,4 @@ if ! grep -qxF "$task_lists_pattern" "$exclude_file" 2>/dev/null; then
   echo "✔︎ Added $task_lists_pattern to .git/info/exclude"
 fi
 
-echo "✅ Cursor rules synced and linked."
+echo "✅ AGENTS.md copied to Cursor rules directory."
