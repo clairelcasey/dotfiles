@@ -40,6 +40,40 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    echo "$PROJECT_LANGUAGE" > tmp/project_language.txt
    echo "$CODE_STANDARDS_PATH" > tmp/code_standards_path.txt
 
+   # Java-Style-Compare Detection (for Java projects)
+   if [ "$PROJECT_LANGUAGE" = "Java" ]; then
+     echo "🔍 Checking for java-style-compare results..."
+     
+     # Look for recent java-style-compare outputs (within last 7 days)
+     SCANNER_FILE=$(find tmp/ -name "java-scan-*.md" -mtime -7 2>/dev/null | head -1)
+     AI_GUIDE_FILE=$(find tmp/ -name "java-style-ai-*.md" -mtime -7 2>/dev/null | head -1)
+     MERGED_FILE=$(find tmp/ -name "java-style-MERGED-*.md" -mtime -7 2>/dev/null | head -1)
+     
+     # Determine completeness of java-style-compare results
+     JAVA_STYLE_STATUS="none"
+     if [ -n "$SCANNER_FILE" ] && [ -n "$AI_GUIDE_FILE" ] && [ -n "$MERGED_FILE" ]; then
+       JAVA_STYLE_STATUS="complete"
+       echo "✅ Complete java-style-compare results found:"
+       echo "   Scanner: $(basename "$SCANNER_FILE")"
+       echo "   AI Guide: $(basename "$AI_GUIDE_FILE")"
+       echo "   Merged: $(basename "$MERGED_FILE")"
+     elif [ -n "$SCANNER_FILE" ] || [ -n "$AI_GUIDE_FILE" ] || [ -n "$MERGED_FILE" ]; then
+       JAVA_STYLE_STATUS="partial"
+       echo "⚠️  Partial java-style-compare results found"
+     else
+       JAVA_STYLE_STATUS="none"
+       echo "ℹ️  No recent java-style-compare results found"
+     fi
+     
+     # Store results for later use
+     echo "$JAVA_STYLE_STATUS" > tmp/java_style_status.txt
+     echo "$SCANNER_FILE" > tmp/java_scanner_file.txt
+     echo "$AI_GUIDE_FILE" > tmp/java_ai_guide_file.txt
+     echo "$MERGED_FILE" > tmp/java_merged_file.txt
+   else
+     echo "none" > tmp/java_style_status.txt
+   fi
+
    # Detect default branch name (master vs main)
    DEFAULT=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD \
              | sed 's@^origin/@@')
@@ -61,14 +95,39 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
    # Read the detected language and standards path
    PROJECT_LANGUAGE=$(cat tmp/project_language.txt 2>/dev/null)
    CODE_STANDARDS_PATH=$(cat tmp/code_standards_path.txt 2>/dev/null)
+   JAVA_STYLE_STATUS=$(cat tmp/java_style_status.txt 2>/dev/null)
 
-   if [ -n "$CODE_STANDARDS_PATH" ] && [ -f "$CODE_STANDARDS_PATH" ]; then
+   # Enhanced Java analysis with java-style-compare integration
+   if [ "$PROJECT_LANGUAGE" = "Java" ] && [ "$JAVA_STYLE_STATUS" = "complete" ]; then
+     echo "🎯 Enhanced Java analysis available - using java-style-compare results"
+     SCANNER_FILE=$(cat tmp/java_scanner_file.txt 2>/dev/null)
+     AI_GUIDE_FILE=$(cat tmp/java_ai_guide_file.txt 2>/dev/null)
+     MERGED_FILE=$(cat tmp/java_merged_file.txt 2>/dev/null)
+     
+     echo "📊 Scanner patterns: $SCANNER_FILE"
+     echo "🤖 AI style guide: $AI_GUIDE_FILE"
+     echo "📋 Merged analysis: $MERGED_FILE"
+     echo "✅ Repository-specific Java style analysis will be included in report"
+     
+   elif [ -n "$CODE_STANDARDS_PATH" ] && [ -f "$CODE_STANDARDS_PATH" ]; then
      echo "📋 Checking $PROJECT_LANGUAGE code compliance against: $CODE_STANDARDS_PATH"
      # Review the standards file to understand documented patterns, anti-patterns, and best practices
      # Cross-reference each changed file against these standards
      echo "✅ Language-specific code standards review will be included in report"
    else
      echo "ℹ️  No language-specific standards available for $PROJECT_LANGUAGE - performing general review only"
+     
+     # Suggest java-style-compare for Java projects if not run recently
+     if [ "$PROJECT_LANGUAGE" = "Java" ] && [ "$JAVA_STYLE_STATUS" != "complete" ]; then
+       if [ "$JAVA_STYLE_STATUS" = "partial" ]; then
+         echo "💡 Suggestion: Partial java-style-compare results detected."
+         echo "   Consider re-running @ai/prompts/java-style-compare.md for complete repository analysis"
+       else
+         echo "💡 Suggestion: For more thorough Java analysis, consider running:"
+         echo "   @ai/prompts/java-style-compare.md"
+         echo "   This will provide repository-specific patterns and style guidance"
+       fi
+     fi
    fi
    ```
 
@@ -104,6 +163,17 @@ changes from reaching the main branch. Do **not** sugar-coat feedback.
        - _Language Detected:_ Note the project language (Java, JavaScript, or Unknown)
        - _Standards Status:_ "No language-specific standards available for [language]"
        - _General Review:_ "Review performed using general best practices only"
+   - **Java Style Analysis Integration:** (Java projects only)
+     - **If complete java-style-compare results available:** Include repository-specific analysis:
+       - _Analysis Source:_ Reference to merged analysis file and timestamp
+       - _Pattern Compliance:_ How changes align with detected repository patterns
+       - _Style Guide Context:_ Specific violations or improvements based on repository style guide
+       - _Anti-Pattern Detection:_ Code changes that match documented anti-patterns
+       - _Framework Alignment:_ Changes follow established framework patterns (Apollo, Dagger, etc.)
+     - **If partial or no java-style-compare results:** Include recommendation:
+       - _Analysis Status:_ Status of java-style-compare results (none/partial/outdated)
+       - _Recommendation:_ "For more comprehensive Java analysis, run `@ai/prompts/java-style-compare.md`"
+       - _Benefits:_ Brief note on how this would enhance future reviews
    - **Findings:** Bullet points or paragraphs for each issue found, referencing the relevant file/line. Be direct and specific. For example:
      - _Potential bug:_ In `Foo.java` line 42, the loop index is off-by-one, which could cause an out-of-bounds error.
      - _Style/Best Practice:_ The function `calculateTotal()` in `Bar.js` is very large – consider refactoring for readability.
@@ -138,7 +208,9 @@ fi
 
 12. **Output Note:** After writing the report, also output a short note in the chat (or console) with the exact filename created, such as: "Code review completed. See `./tmp/{YYYYMMDD_HHMMSS}_code_review_{BRANCH_NAME}.md` for detailed findings and suggestions."
     - Include language detection results and standards used:
-      - For Java: "Review includes compliance check against Java best practices standards."
+      - For Java with complete java-style-compare: "Review includes enhanced Java analysis using repository-specific java-style-compare results."
+      - For Java with partial/no java-style-compare: "Review includes Java best practices check. Consider running `@ai/prompts/java-style-compare.md` for enhanced analysis."
+      - For Java with standards only: "Review includes compliance check against Java best practices standards."
       - For JavaScript: "Review includes compliance check against JavaScript best practices standards."
       - For Unknown: "Project language could not be detected - performed general review using universal best practices."
         (This ensures the user knows the review is done, where to find it, and which language-specific standards were applied.)
