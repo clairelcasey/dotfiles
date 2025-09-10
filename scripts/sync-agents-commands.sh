@@ -44,8 +44,8 @@ build_agents_md() {
     echo ""
     
     # Add the content of the file, excluding command permission sections
-    if [ "$filename" = "_global.md" ]; then
-      # For _global.md, exclude the command permission sections since they're in settings.json
+    if [ "$filename" = "AGENTS.md" ]; then
+      # For AGENTS.md, exclude the command permission sections since they're in settings.json
       sed '/^## Always Allowed Commands$/,/^> The assistant should refuse/d' "$md_file"
     else
       cat "$md_file"
@@ -59,11 +59,11 @@ build_agents_md() {
   done
 }
 
-# Parse allowed commands from _global.md
+# Parse allowed commands from AGENTS.md
 parse_allowed_commands() {
-  local global_file="$RULES_DIR/_global.md"
+  local global_file="$RULES_DIR/AGENTS.md"
   if [ ! -f "$global_file" ]; then
-    echo "Warning: _global.md not found" >&2
+    echo "Warning: AGENTS.md not found" >&2
     return
   fi
   
@@ -80,11 +80,11 @@ parse_allowed_commands() {
     done
 }
 
-# Parse forbidden commands from _global.md
+# Parse forbidden commands from AGENTS.md
 parse_forbidden_commands() {
-  local global_file="$RULES_DIR/_global.md"
+  local global_file="$RULES_DIR/AGENTS.md"
   if [ ! -f "$global_file" ]; then
-    echo "Warning: _global.md not found" >&2
+    echo "Warning: AGENTS.md not found" >&2
     return
   fi
   
@@ -112,7 +112,7 @@ update_settings_json() {
     [ -n "$cmd" ] && forbidden_commands+=("$cmd")
   done < <(parse_forbidden_commands)
   
-  # Add additional pre-configured allowed commands (not in _global.md)
+  # Add additional pre-configured allowed commands (not in AGENTS.md)
   allowed_commands+=(
     "\"Bash(~/dotfiles/scripts/sync-or-create-project-rules.sh:*)\""
     "\"Bash(mv:*)\""

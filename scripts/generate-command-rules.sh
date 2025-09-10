@@ -29,7 +29,7 @@ fi
 
 # Function to generate markdown command list for Claude Code
 generate_claude_commands() {
-    local output_file="$AI_RULES_DIR/_global.md"
+    local output_file="$AI_RULES_DIR/AGENTS.md"
     local temp_file=$(mktemp)
     
     # Read the current file and extract non-command sections
