@@ -5,14 +5,14 @@ Create and manage Jira tickets for the Howcome project using the acli CLI tool.
 ## Usage
 
 ```bash
-/jira create [--summary "Summary"] [--description "Description"] [--type task|bug|story|sub-task] [--parent OH-XXXX]
+/jira create [--summary "Summary"] [--description "Description"] [--type task|bug|story|sub-task] [--parent HOUS-XXXX]
 /jira search [epics|tickets] [--jql "custom JQL"]
 /jira view <ticket-key>
 ```
 
 ## Project Configuration
 
-- **Project**: OH (always)
+- **Project**: HOUS (always)
 - **Assignee**: @me (always)
 - **Parent Epic**: Dynamically selected from current open epics
 
@@ -29,13 +29,13 @@ When creating tickets, I will:
 **Create a database task:**
 
 ```bash
-/jira create --summary "Add index for tagged comment queries" --description "Create composite index on tagged_comments table to optimize filtering by tag and episode" --type task --parent OH-3014
+/jira create --summary "Add index for tagged comment queries" --description "Create composite index on tagged_comments table to optimize filtering by tag and episode" --type task --parent HOUS-3014
 ```
 
 **Create a bug:**
 
 ```bash
-/jira create --summary "Comment filtering returns incorrect results" --description "When filtering by CONTAINS_QUESTION tag, some comments are missing from results" --type bug --parent OH-3184
+/jira create --summary "Comment filtering returns incorrect results" --description "When filtering by CONTAINS_QUESTION tag, some comments are missing from results" --type bug --parent HOUS-3184
 ```
 
 **View epics:**
@@ -47,7 +47,7 @@ When creating tickets, I will:
 **View specific ticket:**
 
 ```bash
-/jira view OH-3184
+/jira view HOUS-3184
 ```
 
 ## Implementation
@@ -59,7 +59,7 @@ When you use this command, I will:
 3. **Search open epics** and suggest best match based on conversation context
 4. **Let user provide** summary and description, or ask targeted questions
 5. **Select proper ticket type** (task/bug/story/sub-task)
-6. **Execute acli command** with proper OH project settings
+6. **Execute acli command** with proper HOUS project settings
 
 **Important**: Don't make assumptions about technical requirements. Always ask for confirmation on:
 
