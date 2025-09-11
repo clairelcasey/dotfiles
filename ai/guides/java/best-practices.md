@@ -15,6 +15,7 @@
 11. [Code Review Checklist](#11-code-review-checklist)
 
 ## Related Guides
+
 - [CompletableFuture Deep Dive](./completable-future.md) - Comprehensive async programming guide
 
 ## 1. Service Layer Patterns
@@ -33,7 +34,7 @@ public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
 
   // 1. Validate request
   isRequestValid(LOG, "getProviderNotified", request, context,
-                 remediationApiProtoRequestBinder::validateGetProviderNotified);
+                 requestValidator::validateRequest);
 
   // 2. Delegate to data layer
   return databaseStore.getProviderNotifiedTimestamp(request.getTracingId())
@@ -42,25 +43,6 @@ public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
         LOG.error("Error fetching provider notification", e);
         throw GrpcStatusMapperUtil.statusFromException(e);
       });
-}
-```
-
-### Exception Mapping Pattern
-
-- Create dedicated utility for mapping internal exceptions to gRPC status codes
-- Always unwrap CompletionException to get the root cause
-- Use consistent error messages and logging
-
-```java
-// GrpcStatusMapperUtil.java
-public static StatusRuntimeException statusFromException(Throwable ex) {
-  Throwable cause = ex.getCause();
-  if (cause instanceof EntityNotFoundException) {
-    return Status.NOT_FOUND.withDescription("entity not found").asRuntimeException();
-  } else if (cause instanceof UserForbiddenException) {
-    return Status.PERMISSION_DENIED.withDescription("user forbidden").asRuntimeException();
-  }
-  return Status.INTERNAL.withCause(ex).withDescription(ex.getMessage()).asRuntimeException();
 }
 ```
 
@@ -83,9 +65,9 @@ public static StatusRuntimeException statusFromException(Throwable ex) {
 └── Exceptions/        # Custom exception types
 
 ❌ Avoid Feature-Based:
-├── pcd/
-├── remediation/
-├── episode-management/
+├── orders/
+├── payments/
+├── user-management/
 ```
 
 ### Consistent Package Organization
@@ -99,7 +81,7 @@ public static StatusRuntimeException statusFromException(Throwable ex) {
 ### Create Focused Utility Classes
 
 - **Always use dedicated utils files for shared functionality**
-- Keep utilities stateless and focused on single responsibilities
+- Keep utilities stateless (pure functions with no side effects) and focused on single responsibilities
 - Use clear, descriptive naming
 
 ```java
@@ -136,16 +118,16 @@ public class ProtoUtils {
 
 - **Only import what you actually use in proto files**
 - Remove unused imports during code review
-- Group imports logically (Google, Spotify internal, local)
+- Group imports logically (Google, internal dependencies, local)
 
 ```protobuf
 // Good: Only necessary imports
 syntax = "proto3";
-package spotify.pcdremediationsystem.v1;
+package com.example.myservice.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
-import "spotify/podcasters/identifiers/identifiers.proto";
+import "com/example/common/identifiers.proto";
 
 // Bad: Unused imports
 import "google/protobuf/any.proto";      // ❌ Not used
@@ -160,24 +142,13 @@ import "google/protobuf/duration.proto"; // ❌ Not used
 
 ## 5. Dependency Injection Patterns
 
-### Module Organization
+### Follow Existing Repository Structure
 
-- Create focused DI modules by functional area
-- Use descriptive module names that indicate their purpose
-
-```java
-// Examples from codebase:
-ConfigurationModule.java    // App configuration
-ClientsModule.java         // External service clients
-StorageModule.java         // Database and persistence
-ValidationModule.java     // Input validation
-PubsubModule.java         // Messaging infrastructure
-```
-
-### Provider Methods
-
-- Use clear naming for provider methods
-- Keep providers focused and testable
+- **Match the DI approach already used in your repository**
+- Some repos use Dagger with modules and `@Provides` methods
+- Others use manual DI with registry classes or factory patterns
+- Examine existing DI classes to understand the established pattern
+- default to manual DI
 
 ## 6. Mapper and Transformation Patterns
 
@@ -207,28 +178,73 @@ public class ShowEpisodeTrackEntityMapper {
 }
 ```
 
+### Handling Nulls with Optional
+
+- Use `Optional.ofNullable()` for potentially null fields during mapping
+- Apply `.map()`, `.flatMap()`, `.filter()`, `.orElse()`, and `.orElseGet()` for safe transformations
+- Use `.orElseThrow()` when absence indicates an error condition
+- **Never use `.get()`** - it's an anti-pattern that throws exceptions
+- Prefer `.ifPresent()` over `.isPresent()` + `.get()` pattern
+- Prevents NullPointerExceptions in mapper logic
+
 ## 7. Error Handling and Logging
+
+### Exception Mapping Patterns
+
+- **Prefer `CompletionResult` and `Result.error(Status)`** for graceful error handling
+- The underlying contract: wrapping `CompletionStage` is never in exception state
+
+```java
+// Preferred: Result-based error handling
+return CompletionResult.fromCompletionStage(
+  CompletableFuture.completedFuture(Result.error(Status.NOT_FOUND))
+);
+
+// Traditional exception mapping (when needed)
+public static StatusRuntimeException statusFromException(Throwable ex) {
+  Throwable cause = ex.getCause();
+  if (cause instanceof EntityNotFoundException) {
+    return Status.NOT_FOUND.withDescription("entity not found").asRuntimeException();
+  }
+  return Status.INTERNAL.withCause(ex).withDescription(ex.getMessage()).asRuntimeException();
+}
+```
+
+### gRPC Status Codes
+
+- Use appropriate gRPC status codes to convey error nature to clients
+- Common patterns: `NOT_FOUND`, `PERMISSION_DENIED`, `INVALID_ARGUMENT`, `INTERNAL`
+
+### Async Exception Handling
+
+- Use `exceptionally()` for simple fallbacks, `handle()` for complex recovery
+- Always unwrap exceptions in async chains
+- Prefer returning `Result.error()` over throwing in async contexts
+
+```java
+.exceptionally(throwable -> {
+  Throwable cause = throwable.getCause();
+  LOG.error("Operation failed for id {}", requestId, cause);
+  return Result.error(statusFromException(cause).getStatus());
+})
+```
 
 ### Consistent Logging Patterns
 
-- Use appropriate log levels (DEBUG, INFO, WARN, ERROR)
-- Include relevant context in log messages
+- Use appropriate log levels and include relevant context
 - Log errors before throwing exceptions
+- Never log secrets or sensitive data
 
 ```java
-// Good logging pattern
-LOG.info("Received setProviderNotified request for case-id {}", request.getTracingId());
-
-// Log errors with context
-LOG.error("Error occurred fetching provider notification for tracing id {}",
-          request.getTracingId(), throwable);
+LOG.info("Processing request for id {}", requestId);
+LOG.error("Operation failed for id {}", requestId, throwable);
 ```
 
 ### Custom Exception Types
 
 - Create specific exception types for different error conditions
 - Keep exceptions focused and descriptive
-- Place in dedicated `Exceptions` package
+- Place in dedicated `exceptions` package
 
 ## 8. Code Organization
 
@@ -254,132 +270,93 @@ LOG.error("Error occurred fetching provider notification for tracing id {}",
 
 > **See also:** [CompletableFuture Deep Dive Guide](./completable-future.md) for comprehensive examples and patterns
 
-### Non-Blocking Composition is Key
+### Key Anti-Patterns to Avoid
 
 - **Never use `.get()` or `.join()`** in application logic - they block threads
+- Don't use blocking I/O in `thenApply` - use `thenApplyAsync` with custom executor
+
+### Composition Patterns
+
 - Use `thenCompose()` for dependent operations to avoid nested futures
 - Use `thenCombine()` for independent operations that need both results
+- Prefer `CompletionStage<T>` over `CompletableFuture<T>` in public APIs
 
 ```java
-// ✅ Good: Non-blocking composition from your codebase
-public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
-    Context context, GetProviderNotifiedRequest request) {
-  
-  return databaseStore.getProviderNotifiedTimestamp(request.getTracingId())
-      .thenApply(timestamp -> buildResponse(timestamp))
-      .exceptionally(e -> {
-        LOG.error("Error fetching provider notification", e);
-        throw GrpcStatusMapperUtil.statusFromException(e);
-      });
-}
-
-// ✅ Good: Chaining dependent operations
+// Good: Chaining dependent operations
 return getUserById(id)
     .thenCompose(user -> getPermissionsFor(user))
     .thenApply(permissions -> buildAuthResponse(permissions));
 ```
 
-### Exception Handling in Async Chains
-
-- **Always unwrap `CompletionException`** to get the original cause
-- Use `exceptionally()` for simple fallbacks, `handle()` for complex recovery
-- Integrate with your existing error mapping utilities
-
-```java
-// ✅ Good: Proper exception unwrapping and mapping
-.exceptionally(throwable -> {
-  Throwable cause = throwable.getCause();
-  LOG.error("Operation failed for tracing id {}", 
-            request.getTracingId(), cause);
-  throw GrpcStatusMapperUtil.statusFromException(cause);
-})
-```
-
-### Threading Best Practices
-
-- **Use dedicated executors** for blocking operations in async callbacks
-- Avoid blocking I/O in `thenApply` - use `thenApplyAsync` with custom executor
-- Prefer `CompletionStage<T>` over `CompletableFuture<T>` in public APIs
-
-```java
-// ✅ Good: Custom executor for potentially blocking operations
-private final Executor databaseExecutor = 
-    Executors.newFixedThreadPool(10, namedThreadFactory("db-async"));
-
-return future.thenApplyAsync(this::processDbResult, databaseExecutor);
-```
-
 ## 10. Testing Patterns
 
-### Test Structure Organization
+### Test Organization
 
-- **Mirror your main package structure** in test directories
+- Mirror your main package structure in test directories
 - Use dedicated test utility packages for shared helpers
 - Keep test data builders focused and reusable
 
-```java
-// ✅ Good: Focused test builders
-public class ProviderNotificationTestBuilder {
-  public static GetProviderNotifiedRequest.Builder defaultRequest() {
-    return GetProviderNotifiedRequest.newBuilder()
-        .setTracingId("test-trace-123");
-  }
-}
-```
-
-### Mock and Stub Patterns
+### Testing Guidelines
 
 - **Mock external dependencies**, not internal domain logic
 - Use consistent naming: `mockClient`, `stubStore`, `fakeValidator`
-- Verify interactions that matter, not implementation details
+- For async code, use `CompletableFuture.completedFuture()` for immediate test values
+- Test both success and failure paths
+- use `@ParameterizedTest` and `@ValueSource` for running the same test with different inputs
 
-### Async Testing
+### Frameworks & Assertions
 
-- **Use `CompletableFuture.completedFuture()`** for immediate test values
-- Test both success and failure paths in async chains
-- Verify proper exception handling and unwrapping
+- Use **JUnit5** as the primary testing framework
+- Prefer JUnit assertions: `Assertions.assertEquals`, `Assertions.assertTrue`, `Assertions.assertThrows`
+- Hamcrest matchers (`assertThat`) provide better error messages and type safety but are no longer recommended by the Backend Advisory Board (BAB)
+- Mockito as the standard mocking framework
 
-```java
-// ✅ Good: Testing async error handling
-when(mockStore.getProviderNotifiedTimestamp(any()))
-    .thenReturn(CompletableFuture.failedFuture(new EntityNotFoundException()));
+### Integration Testing
 
-// Verify the exception is properly mapped
-assertThat(result.isCompletedExceptionally()).isTrue();
-```
+- Test modules working together, not isolated units
+- Use `apollo-test` dependency with `ApolloContainer` for Docker containers
+- Start containers with `@BeforeAll`, create gRPC channels and clients
+- Alternative: `InProcessServer` for same-process testing without network overhead
+- Replace dependencies with mock implementations or use production-like environments
 
 ## 11. Code Review Checklist
 
 ### Service Layer Review
+
 - [ ] Services focus on orchestration, not business logic
 - [ ] Request validation is present and consistent
 - [ ] Exception mapping follows established patterns
 - [ ] No blocking calls in async chains
+- [ ] io.grpc.Context is explicitly passed and correctly handled in service methods
+- [ ] gRPC service methods return CompletionStage or CompletionResult for asynchronous operations
 
 ### Code Organization Review
+
 - [ ] Directory structure follows function-over-feature principle
 - [ ] Utility classes are stateless and focused
 - [ ] Dependencies are properly injected, not instantiated
 - [ ] Proto imports are minimal and necessary
+- [ ] Code adheres to Google Java Style Guide for formatting and naming conventions (e.g., UpperCamelCase for classes, lowerCamelCase for methods)
 
 ### Async Code Review
+
 - [ ] No `.get()` or `.join()` calls in application logic
 - [ ] `CompletionException` is properly unwrapped
 - [ ] Custom executors used for blocking operations
 - [ ] Error handling covers all failure scenarios
 
 ### Testing Review
+
 - [ ] Tests mirror production code structure
 - [ ] Mocks are used appropriately (external deps only)
 - [ ] Async test scenarios cover both success and failure
 - [ ] Test setup is minimal and focused
+- [ ] Integration tests correctly set up ApolloContainer or InProcessServer for gRPC services and their dependencies
+- [ ] JUnit5 is used for testing, with appropriate assertions (assertEquals, assertThrows)
 
 ### Performance & Security Review
+
 - [ ] No secrets logged or exposed in error messages
 - [ ] Resource cleanup is handled properly
 - [ ] Thread pools are sized appropriately
 - [ ] Database queries are efficient and indexed
-
----
-
-_This guide reflects patterns observed in well-structured Java microservices at Spotify and should be adapted to your specific project needs._
