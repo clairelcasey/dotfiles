@@ -24,7 +24,7 @@
 
 - **Service layer should parse and validate requests only**
 - **Handle mapping internal exceptions to appropriate client errors**
-- Delegate business logic to dedicated action/handler classes
+- Delegate business logic to dedicated action classes
 - Use dependency injection for clean separation of concerns
 
 ```java
@@ -55,14 +55,14 @@ public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
 
 ```
 ✅ Good Structure:
-├── actions/           # Business logic handlers
-├── clients/           # External service clients
+├── action/            # Business logic operations
+├── client/            # External service clients
 ├── mapper/            # Data transformation logic
 ├── storage/           # Data persistence layer
 ├── utils/             # Shared utility functions
-├── services/          # API service implementations
-├── entities/          # Domain objects
-└── Exceptions/        # Custom exception types
+├── service/           # API service implementations
+├── entity/            # Domain objects
+└── exception/         # Custom exception types
 
 ❌ Avoid Feature-Based:
 ├── orders/
@@ -74,14 +74,14 @@ public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
 
 - Group related functionality in focused packages
 - Use singular nouns for package names where possible
-- Keep package depth reasonable (3-4 levels max)
+- Keep package depth reasonable (3-4 levels max from base application package, e.g., from `com/spotify/servicename/`)
 
 ## 3. Utilities and Helper Classes
 
 ### Create Focused Utility Classes
 
 - **Always use dedicated utils files for shared functionality**
-- Keep utilities stateless (pure functions with no side effects) and focused on single responsibilities
+- Keep utilities as static classes with no dependencies and focused on single responsibilities
 - Use clear, descriptive naming
 
 ```java
@@ -234,25 +234,34 @@ public static StatusRuntimeException statusFromException(Throwable ex) {
 - Use appropriate log levels and include relevant context
 - Log errors before throwing exceptions
 - Never log secrets or sensitive data
+- Have a preference for using structured logging with `StructuredArguments.entries()` for better searchability and tracing (see `/Users/ccasey/Documents/houston/services-pilot/java/structured-logging` for full docs)
 
 ```java
-LOG.info("Processing request for id {}", requestId);
-LOG.error("Operation failed for id {}", requestId, throwable);
+  LOG.info("Processing request for id {}", requestId);
+  LOG.error("Operation failed for id {}", requestId, throwable);
+
+  // Structured logging example
+  Map<String, String> context = Map.of("correlationId", correlationId, "userId", userId);
+  LOG.info("Processing request: {}", StructuredArguments.entries(context));
 ```
 
 ### Custom Exception Types
 
-- Create specific exception types for different error conditions
-- Keep exceptions focused and descriptive
-- Place in dedicated `exceptions` package
+- Create specific exception types for different error conditions where it can be reused
+- Balance specificity with reusability - avoid creating exceptions for every tiny distinction
+- Place in dedicated `exception` package
 
 ## 8. Code Organization
 
-### Action/Handler Pattern
+### Business Logic Patterns
 
-- Use action classes for complex business logic
-- Keep actions focused on single responsibilities
-- Name actions clearly: `*Handler`, `*Actions`, `*Calculator`
+- Use business logic classes for complex operations
+- Keep each class focused on single responsibilities
+- Use intention-revealing names for business logic classes:
+  - `*Manager`: For coordination, orchestration, and lifecycle management
+  - `*Processor`: For data transformation, computation, and sequential processing
+  - `*Handler`: For event processing, request handling, and reactive patterns
+- Distinguish from service layer: Services orchestrate, business logic classes execute operations
 
 ### Constants and Configuration
 
@@ -280,6 +289,7 @@ LOG.error("Operation failed for id {}", requestId, throwable);
 - Use `thenCompose()` for dependent operations to avoid nested futures
 - Use `thenCombine()` for independent operations that need both results
 - Prefer `CompletionStage<T>` over `CompletableFuture<T>` in public APIs
+- Check if CompletableFutures can replace manual async setup
 
 ```java
 // Good: Chaining dependent operations
@@ -329,6 +339,7 @@ return getUserById(id)
 - [ ] No blocking calls in async chains
 - [ ] io.grpc.Context is explicitly passed and correctly handled in service methods
 - [ ] gRPC service methods return CompletionStage or CompletionResult for asynchronous operations
+- [ ] Business logic is delegated to dedicated classes (Manager/Processor/Handler), not implemented in services
 
 ### Code Organization Review
 
