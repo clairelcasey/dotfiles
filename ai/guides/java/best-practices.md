@@ -10,9 +10,15 @@
 6. [Mapper and Transformation Patterns](#6-mapper-and-transformation-patterns)
 7. [Error Handling and Logging](#7-error-handling-and-logging)
 8. [Code Organization](#8-code-organization)
-9. [CompletableFuture and Asynchronous Programming](#9-completablefuture-and-asynchronous-programming)
-10. [Testing Patterns](#10-testing-patterns)
-11. [Code Review Checklist](#11-code-review-checklist)
+9. [Testing Patterns](#9-testing-patterns)
+10. [Code Review Checklist](#10-code-review-checklist)
+
+## Code Review Instructions
+
+**For AI Code Reviewers**: When reviewing Java code, you must also read and analyze against the detailed async programming patterns in:
+- `/Users/ccasey/dotfiles/ai/guides/java/completable-future.md`
+
+This guide contains comprehensive CompletableFuture patterns, anti-patterns, and best practices that should be applied during code review in addition to the guidelines below.
 
 ## Related Guides
 
@@ -275,30 +281,8 @@ public static StatusRuntimeException statusFromException(Throwable ex) {
 - Use descriptive test helper methods
 - Keep test setup minimal and focused
 
-## 9. CompletableFuture and Asynchronous Programming
 
-> **See also:** [CompletableFuture Deep Dive Guide](./completable-future.md) for comprehensive examples and patterns
-
-### Key Anti-Patterns to Avoid
-
-- **Never use `.get()` or `.join()`** in application logic - they block threads
-- Don't use blocking I/O in `thenApply` - use `thenApplyAsync` with custom executor
-
-### Composition Patterns
-
-- Use `thenCompose()` for dependent operations to avoid nested futures
-- Use `thenCombine()` for independent operations that need both results
-- Prefer `CompletionStage<T>` over `CompletableFuture<T>` in public APIs
-- Check if CompletableFutures can replace manual async setup
-
-```java
-// Good: Chaining dependent operations
-return getUserById(id)
-    .thenCompose(user -> getPermissionsFor(user))
-    .thenApply(permissions -> buildAuthResponse(permissions));
-```
-
-## 10. Testing Patterns
+## 9. Testing Patterns
 
 ### Test Organization
 
@@ -329,7 +313,7 @@ return getUserById(id)
 - Alternative: `InProcessServer` for same-process testing without network overhead
 - Replace dependencies with mock implementations or use production-like environments
 
-## 11. Code Review Checklist
+## 10. Code Review Checklist
 
 ### Service Layer Review
 
@@ -351,10 +335,7 @@ return getUserById(id)
 
 ### Async Code Review
 
-- [ ] No `.get()` or `.join()` calls in application logic
-- [ ] `CompletionException` is properly unwrapped
-- [ ] Custom executors used for blocking operations
-- [ ] Error handling covers all failure scenarios
+- [ ] Review against comprehensive async patterns in [CompletableFuture Deep Dive Guide](/Users/ccasey/dotfiles/ai/guides/java/completable-future.md)
 
 ### Testing Review
 
