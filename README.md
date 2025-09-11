@@ -9,7 +9,7 @@ This dotfiles repository provides:
 - **AI Rule Management**: Global and project-specific rules for AI assistants
 - **Claude Code Integration**: Seamless integration with Anthropic's Claude Code
 - **Development Workflow Automation**: Git workflows, command policies, and task management
-- **Agent System**: Specialized AI agents for different development tasks
+- **Subagent System**: Specialized AI subagents for different development tasks
 - **Repository Cloning Automation**: Intelligent cloning with automatic rule synchronization
 
 ## Quick Start
@@ -30,7 +30,7 @@ This dotfiles repository provides:
 
 3. **Sync Claude Rules**:
    ```bash
-   ~/dotfiles/scripts/sync-claude-commands.sh
+   ~/dotfiles/scripts/sync-agents.sh
    ```
 
 ### Using the ai-clone Command
@@ -54,15 +54,15 @@ This automatically:
 ## Core Components
 
 ### AI Rules System
-- **Global Rules** ([`ai/rules/`](ai/rules/)): User-level development policies
+- **Global Rules** ([`ai/rules/`](ai/rules/)): User-level development policies (stored as `AGENTS.md`)
 - **Project Rules**: Repository-specific AI configuration
 - **Command Policies**: Allowed/forbidden commands for AI assistants
 
 ### AI Components
 
 #### Subagents ([`ai/subagents/`](ai/subagents/))
-| Agent | Purpose | Tools | Color |
-|-------|---------|-------|-------|
+| Subagent | Purpose | Tools | Color |
+|----------|---------|-------|-------|
 | [docs-audit](ai/subagents/docs-audit.md) | Documentation audit specialist | Read, Write, Glob, Grep, LS, Bash | - |
 | [general-explainer](ai/subagents/general-explainer.md) | Code explanation and walkthroughs | Read, Grep, Glob, WebFetch, Write | - |
 | [code-reviewer](ai/subagents/code-reviewer.md) | Ruthless pre-check code reviewer | Read, Grep, Glob, Bash, Write | Yellow |
@@ -82,18 +82,17 @@ This automatically:
 #### Rules ([`ai/rules/`](ai/rules/))
 | Rule | Purpose | Scope |
 |------|---------|-------|
-| [_global](ai/rules/_global.md) | Core command execution policies | All projects |
-| [git_workflows](ai/rules/git_workflows.md) | Git branch, commit, and PR standards | All projects |
-| [task_lists](ai/rules/task_lists.md) | Task management guidelines | All projects |
+| [AGENTS](ai/rules/AGENTS.md) | Core command execution policies and user context | All projects |
+
+*Note: Additional rule files are generated and stored in `.cursor/rules/user-rules/` including `_global.mdc` and `git_workflows.mdc`*
 
 ### Sync Scripts ([`scripts/`](scripts/))
-- **sync-or-create-project-rules.sh**: Main project setup and rule synchronization
-- **sync-claude-commands.sh**: Updates Claude Code configuration
+- **sync-agents.sh**: Main orchestration script for all AI component syncing
+- **sync-agents-commands.sh**: Creates unified AGENTS.md rule file for Claude
+- **sync-claude-subagents.sh**: Syncs subagents to Claude Code
 - **sync-claude-prompts.sh**: Syncs prompts to Claude Code
-- **sync-claude-agents.sh**: Syncs subagents to Claude Code
-- **setup-cursor-rules.sh**: Cursor IDE rule synchronization
-- **setup-dotfiles.sh**: Initial dotfiles setup
-- **setup-gitignore.sh**: Global gitignore configuration
+- **sync-cursor-rules.sh**: Cursor IDE rule synchronization
+- **sync-or-create-project-rules.sh**: Project setup and rule synchronization
 
 ### Utilities ([`bin/`](bin/))
 - **ai-clone**: Intelligent repository cloning with automatic AI setup
@@ -118,23 +117,32 @@ This automatically:
 │   │   ├── java-style-compare.md   # Java style analysis and comparison
 │   │   └── git-commit-push.md      # Git commit and push automation
 │   ├── rules/                       # Global AI rules
-│   │   ├── _global.md              # Core command execution policies
-│   │   ├── git_workflows.md        # Git branch, commit, and PR standards
-│   │   └── task_lists.md           # Task management guidelines
+│   │   └── AGENTS.md               # Core user context and command policies
 │   ├── config/                      # AI configuration files
-│   │   └── personal-global.mdc     # Personal global configuration
-│   └── sync-or-create-project-rules.sh@ # Symlink to main sync script
+│   │   ├── personal-global.mdc     # Personal global configuration
+│   │   ├── commands.json           # Command configurations
+│   │   └── allowed-commands.json   # Allowed command list
+│   └── guides/                      # Language-specific guides
+│       ├── java/                   # Java best practices and patterns
+│       └── javascript/             # JavaScript best practices
 ├── scripts/                         # Shell scripts for automation
-│   ├── sync-or-create-project-rules.sh # Main project setup and rule sync
-│   ├── sync-claude-commands.sh     # Updates Claude Code configuration
-│   ├── sync-claude-prompts.sh      # Syncs prompts to Claude Code
-│   ├── sync-claude-agents.sh       # Syncs subagents to Claude Code
-│   ├── setup-cursor-rules.sh       # Cursor IDE rule synchronization
-│   ├── setup-dotfiles.sh           # Initial dotfiles setup
-│   └── setup-gitignore.sh          # Global gitignore configuration
+│   ├── sync-agents.sh              # Main orchestration script
+│   ├── sync-agents-commands.sh     # Rule compilation and sync
+│   ├── sync-claude-prompts.sh      # Prompts synchronization
+│   ├── sync-claude-subagents.sh    # Subagents synchronization
+│   ├── sync-cursor-rules.sh        # Cursor IDE rule sync
+│   ├── sync-or-create-project-rules.sh # Project setup and rule sync
+│   └── other automation scripts...
 ├── bin/                             # Executable utilities
 │   ├── ai-clone*                   # Intelligent repository cloning
 │   └── pr-list*                    # GitHub pull request management
+├── .cursor/rules/user-rules/        # Generated rule files for Cursor IDE
+│   ├── _global.mdc                 # Global user rules
+│   └── git_workflows.mdc           # Git workflow rules
+├── .claude/                         # Claude Code configuration
+│   ├── AGENTS.md                   # Combined rules (symlinked to CLAUDE.md)
+│   ├── agents/                     # Subagent definitions
+│   └── settings.local.json         # Claude permissions
 └── docs/                            # Documentation
     ├── ARCHITECTURE.md             # System design and components
     ├── DEVELOPMENT.md              # Setup, testing, and contribution
@@ -154,8 +162,8 @@ This automatically:
 - Command execution controls
 - Git workflow standardization
 
-### 3. Agent-Based AI Assistance
-- Specialized agents for different tasks
+### 3. Subagent-Based AI Assistance
+- Specialized subagents for different tasks
 - Color-coded organization
 - Tool-specific capabilities
 
