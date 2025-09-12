@@ -16,6 +16,7 @@
 ## Code Review Instructions
 
 **For AI Code Reviewers**: When reviewing Java code, you must also read and analyze against the detailed async programming patterns in:
+
 - `/Users/ccasey/dotfiles/ai/guides/java/completable-future.md`
 
 This guide contains comprehensive CompletableFuture patterns, anti-patterns, and best practices that should be applied during code review in addition to the guidelines below.
@@ -159,6 +160,7 @@ return CompletionResult.fromCompletionStage(
 ```
 
 ### Logging Patterns
+
 - Use appropriate log levels and include relevant context
 - Never log secrets or sensitive data
 - Prefer structured logging with `StructuredArguments.entries()` for searchability
@@ -170,6 +172,7 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 ```
 
 ### Custom Exception Types
+
 - Create specific exception types for reusable error conditions
 - Balance specificity with reusability
 - Place in dedicated `exception` package
@@ -186,7 +189,6 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - Use dedicated configuration classes
 - Externalize configurable values
 
-
 ## 9. Testing Patterns
 
 - Mirror main package structure in test directories
@@ -196,14 +198,16 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - Test both success and failure paths
 - Use `@ParameterizedTest` and `@ValueSource` for multiple inputs
 - Use JUnit5 as primary testing framework
-- Prefer JUnit assertions: `assertEquals`, `assertTrue`, `assertThrows`
-- Mockito as standard mocking framework
+- Prefer AssertJ's fluent API over JUnit assertions
+- Use Mockito as standard mocking framework
+
 - Use `apollo-test` with `ApolloContainer` for Docker containers
 - Alternative: `InProcessServer` for same-process testing
 
 ## 10. Code Review Checklist
 
 ### Service Layer Review
+
 - [ ] Services focus on orchestration, not business logic
 - [ ] Request validation is present and consistent
 - [ ] Exception mapping follows established patterns
@@ -213,6 +217,7 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - [ ] Business logic delegated to dedicated classes (Manager/Processor/Handler)
 
 ### Code Organization Review
+
 - [ ] Directory structure follows function-over-feature principle
 - [ ] Utility classes are stateless and focused
 - [ ] Dependencies are properly injected, not instantiated
@@ -220,9 +225,11 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - [ ] Code adheres to Google Java Style Guide
 
 ### Async Code Review
+
 - [ ] Review against [CompletableFuture Deep Dive Guide](/Users/ccasey/dotfiles/ai/guides/java/completable-future.md)
 
 ### Testing Review
+
 - [ ] Tests mirror production code structure
 - [ ] Mocks used appropriately (external deps only)
 - [ ] Async test scenarios cover success and failure
@@ -231,6 +238,7 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - [ ] JUnit5 used with appropriate assertions
 
 ### Performance & Security Review
+
 - [ ] No secrets logged or exposed in error messages
 - [ ] Resource cleanup handled properly
 - [ ] Thread pools sized appropriately
