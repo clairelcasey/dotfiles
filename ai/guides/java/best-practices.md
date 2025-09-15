@@ -101,6 +101,7 @@ public class ServiceUtils {
 - Group imports logically (Google, internal dependencies, local)
 - Keep related message types in the same file
 - Version your APIs appropriately (v1, v2, v3)
+- see if any issues here can be handled via deterministic linter rules
 
 ```protobuf
 syntax = "proto3";
@@ -123,7 +124,8 @@ import "com/example/common/identifiers.proto";
 - Create specific mappers for different transformation needs
 - Keep mapping logic separate from business logic
 - Use descriptive names that indicate source and target
-- Use `Optional.ofNullable()` for potentially null fields
+- Use `Optional.ofNullable()` for potentially null fields.
+- See about deterministic linter rules if there is an issue with null handling.
 - Never use `.get()` - prefer `.orElse()`, `.orElseThrow()`, `.ifPresent()`
 
 ```java
@@ -175,7 +177,7 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 
 - Create specific exception types for reusable error conditions
 - Balance specificity with reusability
-- Place in dedicated `exception` package
+- Place reusable exception types in dedicated `exception` package
 
 ## 8. Code Organization
 
