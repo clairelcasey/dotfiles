@@ -11,7 +11,8 @@
 7. [Error Handling and Logging](#7-error-handling-and-logging)
 8. [Code Organization](#8-code-organization)
 9. [Testing Patterns](#9-testing-patterns)
-10. [Code Review Checklist](#10-code-review-checklist)
+10. [Modern Java Standards](#10-modern-java-standards)
+11. [Code Review Checklist](#11-code-review-checklist)
 
 ## Code Review Instructions
 
@@ -82,6 +83,7 @@ Avoid Feature-Based:
 - Always use dedicated utils files for shared functionality
 - Keep utilities as static classes with no dependencies
 - Use clear, descriptive naming
+- Never include constructors in utility classes that are never meant to be instantiated
 
 ```java
 // Examples: ServiceUtils.java, GrpcStatusMapperUtil.java, ProtoUtils.java
@@ -206,7 +208,11 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - Use `apollo-test` with `ApolloContainer` for Docker containers
 - Alternative: `InProcessServer` for same-process testing
 
-## 10. Code Review Checklist
+## 10. Modern Java Standards
+
+Follow modern Java standards and patterns.
+
+## 11. Code Review Checklist
 
 ### Service Layer Review
 
@@ -238,6 +244,10 @@ LOG.info("Processing request: {}", StructuredArguments.entries(context));
 - [ ] Test setup is minimal and focused
 - [ ] Integration tests use ApolloContainer or InProcessServer
 - [ ] JUnit5 used with appropriate assertions
+
+### Modern Java Standards Review
+
+- [ ] Follows modern Java standards and patterns
 
 ### Performance & Security Review
 
