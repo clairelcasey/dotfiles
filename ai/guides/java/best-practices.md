@@ -3,15 +3,15 @@
 ## Table of Contents
 
 1. [Service Layer Patterns](#1-service-layer-patterns)
-2. [Directory Structure & Naming](#2-directory-structure--naming)
+2. [Code Organization](#2-code-organization)
 3. [Utilities and Helper Classes](#3-utilities-and-helper-classes)
 4. [Proto File Management](#4-proto-file-management)
 5. [Dependency Injection Patterns](#5-dependency-injection-patterns)
 6. [Mapper and Transformation Patterns](#6-mapper-and-transformation-patterns)
 7. [Error Handling and Logging](#7-error-handling-and-logging)
-8. [Code Organization](#8-code-organization)
-9. [Testing Patterns](#9-testing-patterns)
-10. [Modern Java Standards](#10-modern-java-standards)
+8. [Testing Patterns](#8-testing-patterns)
+9. [Modern Java Standards](#9-modern-java-standards)
+10. [Library Standards](#10-library-standards)
 11. [Code Review Checklist](#11-code-review-checklist)
 
 ## Code Review Instructions
@@ -25,6 +25,7 @@ This guide contains comprehensive CompletableFuture patterns, anti-patterns, and
 ## Related Guides
 
 - [CompletableFuture Deep Dive](./completable-future.md) - Comprehensive async programming guide
+- [Database Patterns Guide](./database-patterns.md) - Database design patterns and best practices
 
 ## 1. Service Layer Patterns
 
@@ -32,6 +33,12 @@ This guide contains comprehensive CompletableFuture patterns, anti-patterns, and
 - Handle mapping internal exceptions to appropriate client errors
 - Delegate business logic to dedicated action classes
 - Use dependency injection for clean separation of concerns
+
+### gRPC Context Propagation
+
+- **Always explicitly propagate gRPC context** - pass `io.grpc.Context` from service Impl to all downstream calls
+- **Never use `Context.current()`** except in tests - implicit context propagation causes bugs and incidents
+- **Use Contextual Protoc Plugin** - generated clients require explicit `Context` parameter for safer context handling
 
 ```java
 // Good: Service focuses on validation and orchestration
@@ -52,7 +59,9 @@ public CompletionStage<GetProviderNotifiedResponse> getProviderNotified(
 }
 ```
 
-## 2. Directory Structure & Naming
+## 2. Code Organization
+
+### Package & Directory Structure
 
 - Name directories by what they do, not what feature they belong to
 - Use clear, descriptive names that indicate purpose
@@ -77,6 +86,18 @@ Avoid Feature-Based:
 - Group related functionality in focused packages
 - Use singular nouns for package names
 - Keep package depth reasonable (3-4 levels max)
+
+### Class Organization
+
+- Use business logic classes for complex operations
+- Keep each class focused on single responsibilities
+- Use intention-revealing names:
+  - `*Manager`: Coordination, orchestration, lifecycle management
+  - `*Processor`: Data transformation, computation, sequential processing
+  - `*Handler`: Event processing, request handling, reactive patterns
+- Services orchestrate, business logic classes execute operations
+- Use dedicated configuration classes
+- Externalize configurable values
 
 ## 3. Utilities and Helper Classes
 
@@ -175,42 +196,74 @@ Map<String, String> context = Map.of("correlationId", correlationId, "userId", u
 LOG.info("Processing request: {}", StructuredArguments.entries(context));
 ```
 
+### gRPC Error Handling Patterns
+
+- **Use top-level exception handler** - centralize exception mapping in service Impl with single `.exceptionally()` call
+- **Unwrap exception wrappers** - always unwrap `CompletionException` and `ExecutionException` to get real cause
+- **Map to appropriate gRPC status** - use `RpcHandlerException` for custom exceptions with proper status codes
+- **Handle client errors appropriately** - map HTTP status codes to gRPC status for Apollo/HTTP clients
+- **Throw exceptions close to source** - create exceptions where errors are detected, not higher up the call stack
+- **Let exceptions bubble up** - avoid catching and re-throwing unless you need to add context or change error type
+
+_Reference: [Spotify gRPC Documentation](https://backstage.spotify.net/docs/default/component/grpc/) | Local: [gRPC Golden Path](/Users/ccasey/Documents/houston/spotify-wide/talk-mission-docs/docs/golden_path/Backend_Golden_Path_for_Podcast_Mission/Spotify_Backends/Developing_Your_Backend_Service/2_grpc.md)_
+
 ### Custom Exception Types
 
 - Create specific exception types for reusable error conditions
 - Balance specificity with reusability
 - Place reusable exception types in dedicated `exception` package
 
-## 8. Code Organization
 
-- Use business logic classes for complex operations
-- Keep each class focused on single responsibilities
-- Use intention-revealing names:
-  - `*Manager`: Coordination, orchestration, lifecycle management
-  - `*Processor`: Data transformation, computation, sequential processing
-  - `*Handler`: Event processing, request handling, reactive patterns
-- Services orchestrate, business logic classes execute operations
-- Use dedicated configuration classes
-- Externalize configurable values
+## 8. Testing Patterns
 
-## 9. Testing Patterns
+### Test Dependency Strategy
+
+Follow the **Real > Fake > Mock** principle when injecting dependencies:
+
+- **Prefer Real**: Use actual objects when practical (e.g., simple domain objects)
+- **Then Fakes**: Create simple implementations for interfaces with large APIs
+- **Finally Mocks**: Use for complex behaviors or when state management is needed
+
+_Reference: [Spotify Backend Testing Guidelines](https://backstage.spotify.net/docs/default/component/backend/coding/testing/) | Local: [Testing Guidelines](/Users/ccasey/Documents/houston/spotify-wide/backend-docs/docs/coding/testing/index.md) | [Talk Mission Testing Best Practices](/Users/ccasey/Documents/houston/spotify-wide/talk-mission-docs/docs/backend/Backend Testing Best Practices.md)_
+
+### Test Organization
 
 - Mirror main package structure in test directories
-- Mock external dependencies, not internal domain logic
 - Use consistent naming: `mockClient`, `stubStore`, `fakeValidator`
 - For async code, use `CompletableFuture.completedFuture()` for test values
 - Test both success and failure paths
 - Use `@ParameterizedTest` and `@ValueSource` for multiple inputs
-- Use JUnit5 as primary testing framework
-- Prefer AssertJ's fluent API over JUnit assertions
-- Use Mockito as standard mocking framework
 
-- Use `apollo-test` with `ApolloContainer` for Docker containers
+### Test Libraries & Tools
+
+- **JUnit5** as primary testing framework
+- **AssertJ** for fluent assertions (preferred over Hamcrest)
+- **Mockito** for mocking when needed
+- **junit5-extensions** for Spotify-specific helpers and containers
+- **apollo-test** with `ApolloContainer` for Docker containers
 - Alternative: `InProcessServer` for same-process testing
 
-## 10. Modern Java Standards
+### Data Builders
 
-Follow modern Java standards and patterns.
+Use data builder patterns to reduce test setup duplication:
+
+- Static response builders for simple cases
+- Helper methods/factories for common objects
+- MakeItEasy or Proto-test-builder for complex scenarios
+
+_Reference: [Testing Data Builders](https://backstage.spotify.net/docs/default/component/backend/coding/testing/#data-builder) | Local: [Testing Guidelines](/Users/ccasey/Documents/houston/spotify-wide/backend-docs/docs/coding/testing/index.md)_
+
+## 9. Modern Java Standards
+
+Follow modern Java standards: streams/Optional over loops/nulls, immutability (final/records), functional patterns (Modern Java in Action - Manning), builder patterns (Effective Java).
+
+## 10. Library Standards
+
+**Serialization**: Jackson (com.fasterxml.jackson.*) - standard across Spotify
+**Value Types**: Records + @AutoMatter (Java ≥14) or AutoMatter (Java <14)
+**HTTP Clients**: apollo-async-http-client - integrates with CompletionStage async model
+
+_Reference: [Spotify Library Standards](https://backstage.spotify.net/docs/default/component/backend/coding/libraries/) | Local: [Libraries](/Users/ccasey/Documents/houston/spotify-wide/backend-docs/docs/coding/libraries/index.md)_
 
 ## 11. Code Review Checklist
 
@@ -236,6 +289,16 @@ Follow modern Java standards and patterns.
 
 - [ ] Review against [CompletableFuture Deep Dive Guide](/Users/ccasey/dotfiles/ai/guides/java/completable-future.md)
 
+### gRPC Review
+
+- [ ] Context propagation is explicit - no use of `Context.current()` except in tests
+- [ ] Top-level exception handler centralizes error mapping with single `.exceptionally()` call
+- [ ] Exception unwrapping handles `CompletionException` and `ExecutionException`
+- [ ] Appropriate gRPC status codes used (`NOT_FOUND`, `INVALID_ARGUMENT`, `INTERNAL`, etc.)
+- [ ] Client error handling maps HTTP status codes to gRPC status correctly
+- [ ] `RpcHandlerException` used for custom exceptions instead of `StatusRuntimeException`
+- [ ] Exceptions thrown close to error source, not higher up call stack
+
 ### Testing Review
 
 - [ ] Tests mirror production code structure
@@ -248,6 +311,18 @@ Follow modern Java standards and patterns.
 ### Modern Java Standards Review
 
 - [ ] Follows modern Java standards and patterns
+
+### Database Changes Review
+
+- [ ] If database changes included, review against [Database Patterns Guide](./database-patterns.md)
+
+### Library Standards Review
+
+- [ ] Jackson used for serialization
+- [ ] Records + @AutoMatter for value types (Java ≥14)
+- [ ] apollo-async-http-client used for HTTP clients
+- [ ] AssertJ used for test assertions (not Hamcrest)
+- [ ] junit5-extensions used for Spotify-specific test helpers
 
 ### Performance & Security Review
 
