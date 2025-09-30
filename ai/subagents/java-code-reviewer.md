@@ -1,5 +1,5 @@
 ---
-name: java-code-reviewer
+name: precheck-java-code-reviewer
 description: Thorough Java code reviewer with Java-specific standards compliance checking. Uses java-style-compare results if provided.
 tools: Read, Grep, Glob, Bash, Write
 color: blue

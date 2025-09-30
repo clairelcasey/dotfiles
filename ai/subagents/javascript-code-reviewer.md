@@ -1,5 +1,5 @@
 ---
-name: javascript-code-reviewer
+name: precheck-javascript-code-reviewer
 description: Thorough JavaScript/TypeScript code reviewer with ESLint integration and JavaScript-specific standards compliance checking.
 tools: Read, Grep, Glob, Bash, Write
 color: yellow
@@ -57,6 +57,7 @@ JavaScript/TypeScript changes from reaching the main branch. Do **not** sugar-co
    ```
 
 2. **JavaScript Build & Test:** Determine how to build and test the JavaScript project:
+
    - Check for `package.json` and examine scripts section
    - Detect package manager: Look for `package-lock.json` (npm), `yarn.lock` (yarn), or `pnpm-lock.yaml` (pnpm)
    - Common build commands: `npm run build`, `yarn build`, `pnpm build`
@@ -95,6 +96,7 @@ JavaScript/TypeScript changes from reaching the main branch. Do **not** sugar-co
    ```
 
 5. **Review JavaScript Code Changes:** For each changed JavaScript/TypeScript file, analyze the diffs:
+
    - **JavaScript/TypeScript Bug Patterns:** Look for common pitfalls (undefined variables, type errors, async/await issues, memory leaks)
    - **Modern JavaScript Practices:** Check for proper use of ES6+ features (arrow functions, destructuring, modules, async/await)
    - **React Patterns:** If React is used, verify proper hooks usage, component patterns, and state management
@@ -113,12 +115,14 @@ JavaScript/TypeScript changes from reaching the main branch. Do **not** sugar-co
      - Verify that new components follow the same patterns as existing similar JavaScript components
 
 6. **JavaScript Documentation Update Check:** Determine if any JavaScript-specific documentation should be updated:
+
    - Check for JSDoc comments on complex functions and classes
    - Verify README mentions any new JavaScript-specific dependencies or setup
    - Check if API documentation needs updates for new endpoints or interfaces
    - Ensure TypeScript interfaces are properly documented if applicable
 
 7. **JavaScript Test Coverage Check:** Verify if tests exist for the new or changed JavaScript functionality:
+
    - Look for test files (`.test.js`, `.spec.js`, `.test.ts`, `.spec.ts`) in appropriate directories
    - Check for React component tests if using React Testing Library or similar
    - Verify integration tests for API endpoints or complex business logic
@@ -126,12 +130,14 @@ JavaScript/TypeScript changes from reaching the main branch. Do **not** sugar-co
    - If important JavaScript logic changed and no tests were updated, mark this as an issue
 
 8. **JavaScript Linting & Formatting Check:**
+
    - Run ESLint if configuration exists: `npm run lint` or `npx eslint .`
    - Run Prettier if configuration exists: `npm run format` or `npx prettier --check .`
    - Run TypeScript compiler if TypeScript: `npx tsc --noEmit`
    - Check for any custom quality scripts in package.json
 
 9. **Report Generation:** Compile a **JavaScript Code Review Report** in Markdown format with clear sections:
+
    - **Summary of Changes:** A brief overview of what the JavaScript/TypeScript changes do
    - **Build/Test Results:** Outcome of running JavaScript build/tests (pass/fail and any errors)
    - **JavaScript Code Standards Compliance:**
